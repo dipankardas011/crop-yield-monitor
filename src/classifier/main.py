@@ -12,6 +12,8 @@ from torch.autograd import Variable
 import torchvision
 import pathlib
 
+from src.classifier.ConvNet import ConvNet
+
 # checking for device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -51,71 +53,7 @@ classes = sorted([j.name.split('/')[-1] for j in root.iterdir()])
 # CNN Network
 print(classes)
 
-
-class ConvNet(nn.Module):
-    def __init__(self, num_classes):
-        super(ConvNet, self).__init__()
-
-        # Output size after convolution filter
-        # ((w-f+2P)/s) +1
-
-        # Input shape= (256,3,150,150)
-
-        self.conv1 = nn.Conv2d(
-            in_channels=3, out_channels=12, kernel_size=3, stride=1, padding=1)
-        # Shape= (256,12,150,150)
-        self.bn1 = nn.BatchNorm2d(num_features=12)
-        # Shape= (256,12,150,150)
-        self.relu1 = nn.ReLU()
-        # Shape= (256,12,150,150)
-
-        self.pool = nn.MaxPool2d(kernel_size=2)
-        # Reduce the image size be factor 2
-        # Shape= (256,12,75,75)
-
-        self.conv2 = nn.Conv2d(
-            in_channels=12, out_channels=20, kernel_size=3, stride=1, padding=1)
-        # Shape= (256,20,75,75)
-        self.relu2 = nn.ReLU()
-        # Shape= (256,20,75,75)
-
-        self.conv3 = nn.Conv2d(
-            in_channels=20, out_channels=batchSize, kernel_size=3, stride=1, padding=1)
-        # Shape= (256,32,75,75)
-        self.bn3 = nn.BatchNorm2d(num_features=batchSize)
-        # Shape= (256,32,75,75)
-        self.relu3 = nn.ReLU()
-        # Shape= (256,32,75,75)
-
-        self.fc = nn.Linear(in_features=75 * 75 * batchSize, out_features=num_classes)
-
-        # softmax & sigmoid
-        # Feed forward function
-
-    def forward(self, input):
-        output = self.conv1(input)
-        output = self.bn1(output)
-        output = self.relu1(output)
-
-        output = self.pool(output)
-
-        output = self.conv2(output)
-        output = self.relu2(output)
-
-        output = self.conv3(output)
-        output = self.bn3(output)
-        output = self.relu3(output)
-
-        # Above output will be in matrix form, with shape (256,32,75,75)
-
-        output = output.view(-1, batchSize * 75 * 75)
-
-        output = self.fc(output)
-
-        return output
-
-
-model = ConvNet(num_classes=len(classes)).to(device)
+model = ConvNet(num_classes=len(classes), batchsize=batchSize).to(device)
 
 # Optmizer and loss function
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -130,7 +68,7 @@ print(train_count, test_count)
 # Model training and saving best model
 
 best_accuracy = 0.0
-num_epochs = 100
+num_epochs = 10
 
 for epoch in range(num_epochs):
 
@@ -186,7 +124,7 @@ print("DONE WITH PREDICTION")
 print(f"==================Best testAcc [{best_accuracy * 100} %]==================")
 
 checkpoint = torch.load('best_checkpoint.model')
-model = ConvNet(num_classes=len(classes))
+model = ConvNet(num_classes=len(classes), batchsize=batchSize)
 model.load_state_dict(checkpoint)
 model.eval()
 
@@ -208,8 +146,10 @@ def prediction(img_path, transformer):
         image_tensor.cuda()
     input = Variable(image_tensor)
     output = model(input)
+    print(f"Output Array {output.data.numpy()}")
     index = output.data.numpy().argmax()
     pred = classes[index]
+    print(f"Input Img: {img_path[img_path.rfind('/') + 1:]}\tPredicted class {pred}\tindex {index}", end="\n=========\n")
     return pred
 
 
@@ -219,5 +159,3 @@ pred_dict = {}
 
 for i in images_path:
     pred_dict[i[i.rfind('/') + 1:]] = prediction(i, transformer_pred)
-
-print(pred_dict)

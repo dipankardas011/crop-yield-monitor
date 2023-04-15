@@ -19,7 +19,7 @@ classes = sorted([j.name.split('/')[-1] for j in root.iterdir()])
 
 # CNN Network
 print(classes)
-checkpoint = torch.load('models/best_95_checkpoint_15_04_23.model')
+checkpoint = torch.load('models/best_checkpoint.model')
 model = ConvNet(num_classes=len(classes), batchsize=batchSize)
 model.load_state_dict(checkpoint)
 model.eval()

@@ -1,7 +1,5 @@
 # Load libraries
 from PIL import Image
-import os
-import numpy as np
 import torch
 import glob
 import torch.nn as nn
@@ -12,7 +10,9 @@ from torch.autograd import Variable
 import torchvision
 import pathlib
 
-from src.classifier.ConvNet import ConvNet
+from src.ConvNet import ConvNet
+
+NUM_EPOCHS = 100
 
 # checking for device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -68,9 +68,8 @@ print(train_count, test_count)
 # Model training and saving best model
 
 best_accuracy = 0.0
-num_epochs = 10
 
-for epoch in range(num_epochs):
+for epoch in range(NUM_EPOCHS):
 
     # Evaluation and training on training dataset
     model.train()
@@ -117,13 +116,13 @@ for epoch in range(num_epochs):
 
     # Save the best model
     if test_accuracy > best_accuracy:
-        torch.save(model.state_dict(), 'best_checkpoint.model')
+        torch.save(model.state_dict(), 'models/best_95_checkpoint_15_04_23.model')
         best_accuracy = test_accuracy
 
 print("DONE WITH PREDICTION")
 print(f"==================Best testAcc [{best_accuracy * 100} %]==================")
 
-checkpoint = torch.load('best_checkpoint.model')
+checkpoint = torch.load('models/best_95_checkpoint_15_04_23.model')
 model = ConvNet(num_classes=len(classes), batchsize=batchSize)
 model.load_state_dict(checkpoint)
 model.eval()
@@ -138,6 +137,7 @@ pred_path = './references/pred/'
 
 
 # prediction function
+
 def prediction(img_path, transformer):
     image = Image.open(img_path)
     image_tensor = transformer(image).float()
@@ -146,16 +146,25 @@ def prediction(img_path, transformer):
         image_tensor.cuda()
     input = Variable(image_tensor)
     output = model(input)
-    print(f"Output Array {output.data.numpy()}")
+    # print(f"Output Array {output.data.numpy()}")
     index = output.data.numpy().argmax()
-    pred = classes[index]
-    print(f"Input Img: {img_path[img_path.rfind('/') + 1:]}\tPredicted class {pred}\tindex {index}", end="\n=========\n")
-    return pred
+    predClass = classes[index]
+
+    # print(f"Input Img: {img_path[img_path.rfind('/') + 1:]}\nPredicted class {predClass}\nindex {index}",
+    #       end="\n=========\n")
+    return predClass
 
 
 images_path = glob.glob(pred_path + '/*.jpg')
 
-pred_dict = {}
+pred_accuracy = 0.0
 
 for i in images_path:
-    pred_dict[i[i.rfind('/') + 1:]] = prediction(i, transformer_pred)
+    predClass = prediction(i, transformer_pred)
+    imgName = i[i.rfind('/') + 1:]
+    orgClass = imgName.split('_')[:1][0].title() + " Soil"
+
+    if orgClass == predClass:
+        pred_accuracy += 1
+
+print(f"Correct Prediction: {pred_accuracy} out of {len(images_path)} -> {pred_accuracy/len(images_path)}")

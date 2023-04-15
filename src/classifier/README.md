@@ -1,7 +1,7 @@
 # how to run the docker build and run
 
 ```bash
-cd src/classifer
+cd src/classifier
 mkdir container-models
 ```
 

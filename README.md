@@ -7,5 +7,5 @@
 
 - [Software Requirement Doc](#)
 
-- [Design Doc](#)
+- [Design Doc](https://gitlab.com/dipankardas011/draw.io/-/tree/main/crop-yield)
 

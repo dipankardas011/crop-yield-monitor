@@ -1,11 +1,7 @@
 # crop-yield-monitor
 
 # Project Documents
-- [Project Charter](https://docs.google.com/document/d/1EHTCsbSBfmcL4fw4TkzDte_nqa1eHkXM8fAD1oZ3VHE/edit?usp=sharing)
+- [Project Docs](https://docs.google.com/document/d/1OA2uJ1kn7ileYLgplpS6gbcuHSR6UofU6R5m0gyzHmE/edit?usp=sharing)
 
-- [Scope Management Plan Doc](#)
-
-- [Software Requirement Doc](#)
-
-- [Design Doc](https://gitlab.com/dipankardas011/draw.io/-/tree/main/crop-yield)
+- **Design Doc** -> folder `design/`
 

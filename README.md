@@ -5,3 +5,5 @@
 
 - **Design Doc** -> folder `design/`
 
+![design image](design-plan.jpeg)
+

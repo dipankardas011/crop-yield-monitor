@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to Bytes</title>
+</head>
+
+<body>
+  <h2>Upload Image</h2>
+  <input type="file" id="fileInput" accept="image/*">
+  <h3>Bytes Output:</h3>
+  <textarea id="outputBytes" rows="10" cols="80" readonly></textarea>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      let format = file.type;
+      if (file.type === "image/png" || file.type === "image/jpeg") {
+        console.log("Image format");
+      } else {
+        console.log("Image format: Unknown");
+        alert("Invalid file");
+        exit(1);
+      }
+
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const arrayBuffer = reader.result;
+        const byteArray = new Uint8Array(arrayBuffer);
+        const byteValues = Array.from(byteArray);
+
+        document.getElementById('outputBytes').value = JSON.stringify(byteValues);
+
+        fetch('http://localhost:8080/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ image: byteValues, format: String(format) })
+        }).then(response => response.json())
+          .then(data => console.log(data));
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  </script>
+</body>
+
+</html>

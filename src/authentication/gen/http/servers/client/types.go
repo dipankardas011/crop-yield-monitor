@@ -24,13 +24,13 @@ type LoginRequestBody struct {
 // SignupRequestBody is the type of the "servers" service "signup" endpoint
 // HTTP request body.
 type SignupRequestBody struct {
-	// firstname
+	// first name
 	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	// lastname
+	// last name
 	Last *string `form:"last,omitempty" json:"last,omitempty" xml:"last,omitempty"`
 	// password
 	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
-	// email
+	// emailid
 	Emailid *string `form:"emailid,omitempty" json:"emailid,omitempty" xml:"emailid,omitempty"`
 }
 

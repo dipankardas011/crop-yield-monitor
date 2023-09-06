@@ -30,8 +30,8 @@ func UsageCommands() string {
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` servers login --body '{
-      "password": "vtt",
-      "username": "jz4"
+      "password": "77777",
+      "username": "demo"
    }'` + "\n" +
 		""
 }
@@ -171,8 +171,8 @@ Login implements login.
 
 Example:
     %[1]s servers login --body '{
-      "password": "vtt",
-      "username": "jz4"
+      "password": "77777",
+      "username": "demo"
    }'
 `, os.Args[0])
 }
@@ -185,10 +185,10 @@ Signup implements signup.
 
 Example:
     %[1]s servers signup --body '{
-      "emailid": "Consequatur sit eligendi voluptate quod dolorem repellendus.",
-      "first": "Deserunt consequatur enim.",
-      "last": "Magnam deleniti.",
-      "password": "Omnis modi laboriosam corporis."
+      "emailid": "demo@xyz.com",
+      "first": "hello",
+      "last": "world",
+      "password": "77777"
    }'
 `, os.Args[0])
 }

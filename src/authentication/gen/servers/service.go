@@ -58,12 +58,12 @@ type Response struct {
 
 // SignUp is the payload type of the servers service signup method.
 type SignUp struct {
-	// firstname
+	// first name
 	First *string
-	// lastname
+	// last name
 	Last *string
 	// password
 	Password *string
-	// email
+	// emailid
 	Emailid *string
 }

@@ -20,7 +20,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Health'
                             example:
-                                msg: Vel debitis tenetur voluptates.
+                                msg: Impedit est est culpa et nihil expedita.
     /login:
         post:
             tags:
@@ -34,8 +34,8 @@ paths:
                         schema:
                             $ref: '#/components/schemas/LoginRequestBody'
                         example:
-                            password: vtt
-                            username: jz4
+                            password: "77777"
+                            username: demo
             responses:
                 "200":
                     description: OK response.
@@ -44,9 +44,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Response'
                             example:
-                                error: Consequatur autem distinctio.
-                                ok: true
-                                uuid: Ut ut.
+                                error: Unde molestias a illo quia dolor.
+                                ok: false
+                                uuid: Autem et non quis.
     /openapi3.json:
         get:
             tags:
@@ -69,10 +69,10 @@ paths:
                         schema:
                             $ref: '#/components/schemas/SignupRequestBody'
                         example:
-                            emailid: Consequatur sit eligendi voluptate quod dolorem repellendus.
-                            first: Deserunt consequatur enim.
-                            last: Magnam deleniti.
-                            password: Omnis modi laboriosam corporis.
+                            emailid: demo@xyz.com
+                            first: hello
+                            last: world
+                            password: "77777"
             responses:
                 "200":
                     description: OK response.
@@ -81,9 +81,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Response'
                             example:
-                                error: Nam dolorem aspernatur quia voluptas temporibus.
+                                error: Inventore et.
                                 ok: true
-                                uuid: Eum aut sunt doloribus at natus.
+                                uuid: Fugiat voluptatem cum molestiae voluptas omnis.
     /swaggerui/{*path}:
         get:
             tags:
@@ -108,25 +108,25 @@ components:
                 msg:
                     type: string
                     description: message
-                    example: Veniam qui voluptatem dolores aut sed.
+                    example: Id magni ex non dignissimos quo.
             example:
-                msg: Asperiores consectetur et sed.
+                msg: Error quisquam dolorum eius.
         LoginRequestBody:
             type: object
             properties:
                 password:
                     type: string
                     description: Password
-                    example: xlx
+                    example: "77777"
                     minLength: 1
                 username:
                     type: string
                     description: Username
-                    example: i9r
+                    example: demo
                     minLength: 1
             example:
-                password: ac5
-                username: 9to
+                password: "77777"
+                username: demo
             required:
                 - username
                 - password
@@ -136,7 +136,7 @@ components:
                 error:
                     type: string
                     description: error reason
-                    example: Libero sunt praesentium soluta possimus.
+                    example: Optio molestiae sapiente.
                 ok:
                     type: boolean
                     description: operation successful?
@@ -144,35 +144,35 @@ components:
                 uuid:
                     type: string
                     description: unique user identification
-                    example: Ex accusamus.
+                    example: Vero omnis consequuntur autem libero sint voluptas.
             example:
-                error: Ducimus aliquam.
+                error: Sit pariatur omnis dicta distinctio nostrum.
                 ok: true
-                uuid: Non eum ab repellat explicabo quo.
+                uuid: Quia et quod nobis.
         SignupRequestBody:
             type: object
             properties:
                 emailid:
                     type: string
-                    description: email
-                    example: Nesciunt veniam autem itaque dolor.
+                    description: emailid
+                    example: demo@xyz.com
                 first:
                     type: string
-                    description: firstname
-                    example: Voluptas esse.
+                    description: first name
+                    example: hello
                 last:
                     type: string
-                    description: lastname
-                    example: Illum aperiam rerum culpa pariatur voluptatum accusantium.
+                    description: last name
+                    example: world
                 password:
                     type: string
                     description: password
-                    example: Quas amet voluptatem sint quis velit odit.
+                    example: "77777"
             example:
-                emailid: Cumque hic provident et.
-                first: Recusandae expedita ea rerum distinctio quia.
-                last: Et facere a atque.
-                password: Maiores velit dignissimos.
+                emailid: demo@xyz.com
+                first: hello
+                last: world
+                password: "77777"
 tags:
     - name: servers
       description: ksctl server handlers

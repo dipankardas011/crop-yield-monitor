@@ -111,7 +111,7 @@ definitions:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: false
+                example: true
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -154,9 +154,9 @@ definitions:
             msg:
                 type: string
                 description: message
-                example: Excepturi et.
+                example: Est qui et.
         example:
-            msg: Eum ipsam mollitia.
+            msg: Est doloribus sunt.
     ServersLoginRequestBody:
         title: ServersLoginRequestBody
         type: object
@@ -164,16 +164,16 @@ definitions:
             password:
                 type: string
                 description: Password
-                example: rf
+                example: "77777"
                 minLength: 1
             username:
                 type: string
                 description: Username
-                example: "7"
+                example: demo
                 minLength: 1
         example:
-            password: c
-            username: nu8
+            password: "77777"
+            username: demo
         required:
             - username
             - password
@@ -184,52 +184,7 @@ definitions:
             error:
                 type: string
                 description: error reason
-                example: Sunt ratione.
-            ok:
-                type: boolean
-                description: operation successful?
-                example: false
-            uuid:
-                type: string
-                description: unique user identification
-                example: Optio molestiae sapiente.
-        example:
-            error: Omnis consequuntur autem libero sint.
-            ok: false
-            uuid: Debitis ea sit pariatur omnis dicta.
-    ServersSignupRequestBody:
-        title: ServersSignupRequestBody
-        type: object
-        properties:
-            emailid:
-                type: string
-                description: email
-                example: Qui numquam velit in repudiandae consequatur eius.
-            first:
-                type: string
-                description: firstname
-                example: Voluptates ipsam assumenda voluptate cum.
-            last:
-                type: string
-                description: lastname
-                example: Distinctio sunt.
-            password:
-                type: string
-                description: password
-                example: Eligendi est tenetur sed sit qui praesentium.
-        example:
-            emailid: Nobis dolorem.
-            first: Totam quibusdam dolores aut qui.
-            last: Molestiae fugit aut voluptate.
-            password: Id aut accusamus cum sed.
-    ServersSignupResponseBody:
-        title: ServersSignupResponseBody
-        type: object
-        properties:
-            error:
-                type: string
-                description: error reason
-                example: Quo at error quisquam dolorum eius ipsam.
+                example: Porro deserunt consequatur enim fugiat magnam deleniti.
             ok:
                 type: boolean
                 description: operation successful?
@@ -237,8 +192,53 @@ definitions:
             uuid:
                 type: string
                 description: unique user identification
-                example: Et architecto aliquid qui fugiat vel reiciendis.
+                example: Omnis modi laboriosam corporis.
         example:
-            error: Odio aut.
+            error: Sit eligendi voluptate.
             ok: false
-            uuid: Corporis laboriosam exercitationem dolorum maiores magni.
+            uuid: Dolorem repellendus reiciendis.
+    ServersSignupRequestBody:
+        title: ServersSignupRequestBody
+        type: object
+        properties:
+            emailid:
+                type: string
+                description: emailid
+                example: demo@xyz.com
+            first:
+                type: string
+                description: first name
+                example: hello
+            last:
+                type: string
+                description: last name
+                example: world
+            password:
+                type: string
+                description: password
+                example: "77777"
+        example:
+            emailid: demo@xyz.com
+            first: hello
+            last: world
+            password: "77777"
+    ServersSignupResponseBody:
+        title: ServersSignupResponseBody
+        type: object
+        properties:
+            error:
+                type: string
+                description: error reason
+                example: Dolorem aspernatur.
+            ok:
+                type: boolean
+                description: operation successful?
+                example: true
+            uuid:
+                type: string
+                description: unique user identification
+                example: Voluptas temporibus expedita eum aut sunt doloribus.
+        example:
+            error: Autem vel debitis.
+            ok: true
+            uuid: Voluptates et.

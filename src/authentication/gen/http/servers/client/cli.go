@@ -25,7 +25,7 @@ func BuildLoginPayload(serversLoginBody string) (*servers.Request, error) {
 	{
 		err = json.Unmarshal([]byte(serversLoginBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"password\": \"vtt\",\n      \"username\": \"jz4\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"password\": \"77777\",\n      \"username\": \"demo\"\n   }'")
 		}
 		if utf8.RuneCountInString(body.Username) < 1 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.username", body.Username, utf8.RuneCountInString(body.Username), 1, true))
@@ -53,7 +53,7 @@ func BuildSignupPayload(serversSignupBody string) (*servers.SignUp, error) {
 	{
 		err = json.Unmarshal([]byte(serversSignupBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"emailid\": \"Consequatur sit eligendi voluptate quod dolorem repellendus.\",\n      \"first\": \"Deserunt consequatur enim.\",\n      \"last\": \"Magnam deleniti.\",\n      \"password\": \"Omnis modi laboriosam corporis.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"emailid\": \"demo@xyz.com\",\n      \"first\": \"hello\",\n      \"last\": \"world\",\n      \"password\": \"77777\"\n   }'")
 		}
 	}
 	v := &servers.SignUp{

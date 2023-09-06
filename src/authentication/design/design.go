@@ -20,11 +20,13 @@ var ReqAuth = Type("Request", func() {
 	Attribute("username", String, func() {
 		MinLength(1)
 		Description("Username")
+		Example("demo")
 	})
 
 	Attribute("password", String, func() {
 		MinLength(1)
 		Description("Password")
+		Example("77777")
 	})
 
 	Required("username", "password")
@@ -40,12 +42,24 @@ var ResultAuth = Type("Response", func() {
 })
 
 var SignupAuth = Type("SignUp", func() {
-	Attribute("first", String, "firstname")
-	Attribute("last", String, "lastname")
+	Attribute("first", String, func() {
+		Description("first name")
+		Example("hello")
+	})
+	Attribute("last", String, func() {
+		Description("last name")
+		Example("world")
+	})
 
-	Attribute("password", String, "password")
+	Attribute("password", String, func() {
+		Description("password")
+		Example("77777")
+	})
 
-	Attribute("emailid", String, "email")
+	Attribute("emailid", String, func() {
+		Description("emailid")
+		Example("demo@xyz.com")
+	})
 })
 
 var HealthAuth = Type("Health", func() {

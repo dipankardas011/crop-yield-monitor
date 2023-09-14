@@ -1,0 +1,459 @@
+swagger: "2.0"
+info:
+    title: image
+    description: crop yield monitor
+    version: ""
+host: 0.0.0.0:8081
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /fetch:
+        get:
+            tags:
+                - servers
+            summary: fetch servers
+            operationId: servers#fetch
+            parameters:
+                - name: FetchRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/ServersFetchRequestBody'
+                    required:
+                        - uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ServersFetchResponseBody'
+                        required:
+                            - ok
+                            - error
+            schemes:
+                - http
+    /healthz:
+        get:
+            tags:
+                - servers
+            summary: get health servers
+            operationId: servers#get health
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ServersGetHealthResponseBody'
+            schemes:
+                - http
+    /openapi3.json:
+        get:
+            tags:
+                - servers
+            summary: Download ./gen/http/openapi3.json
+            operationId: servers#/openapi3.json
+            responses:
+                "200":
+                    description: File downloaded
+                    schema:
+                        type: file
+            schemes:
+                - http
+    /swaggerui/{path}:
+        get:
+            tags:
+                - servers
+            summary: Download ./swaggerui
+            operationId: servers#/swaggerui/{*path}
+            parameters:
+                - name: path
+                  in: path
+                  description: Relative file path
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: File downloaded
+                    schema:
+                        type: file
+                "404":
+                    description: File not found
+                    schema:
+                        $ref: '#/definitions/Error'
+            schemes:
+                - http
+    /upload:
+        post:
+            tags:
+                - servers
+            summary: upload servers
+            operationId: servers#upload
+            parameters:
+                - name: UploadRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/ServersUploadRequestBody'
+                    required:
+                        - image
+                        - uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ServersUploadResponseBody'
+                        required:
+                            - ok
+                            - error
+            schemes:
+                - http
+definitions:
+    Error:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Error response result type (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    ServersFetchRequestBody:
+        title: ServersFetchRequestBody
+        type: object
+        properties:
+            uuid:
+                type: string
+                description: unique userid
+                example: "1"
+                minLength: 1
+        example:
+            uuid: "1"
+        required:
+            - uuid
+    ServersFetchResponseBody:
+        title: ServersFetchResponseBody
+        type: object
+        properties:
+            error:
+                type: string
+                description: error reason
+                example: Veniam voluptatum.
+            image:
+                type: string
+                description: image in []byte
+                example:
+                    - 78
+                    - 101
+                    - 99
+                    - 101
+                    - 115
+                    - 115
+                    - 105
+                    - 116
+                    - 97
+                    - 116
+                    - 105
+                    - 98
+                    - 117
+                    - 115
+                    - 32
+                    - 115
+                    - 105
+                    - 116
+                    - 32
+                    - 101
+                    - 117
+                    - 109
+                    - 32
+                    - 117
+                    - 116
+                    - 32
+                    - 115
+                    - 101
+                    - 100
+                    - 32
+                    - 114
+                    - 101
+                    - 114
+                    - 117
+                    - 109
+                    - 32
+                    - 110
+                    - 101
+                    - 113
+                    - 117
+                    - 101
+                    - 46
+                format: byte
+            ok:
+                type: boolean
+                description: operation successful?
+                example: false
+        example:
+            error: Enim et et placeat qui ex.
+            image:
+                - 81
+                - 117
+                - 105
+                - 115
+                - 32
+                - 97
+                - 115
+                - 115
+                - 117
+                - 109
+                - 101
+                - 110
+                - 100
+                - 97
+                - 32
+                - 99
+                - 117
+                - 109
+                - 113
+                - 117
+                - 101
+                - 32
+                - 118
+                - 111
+                - 108
+                - 117
+                - 112
+                - 116
+                - 97
+                - 116
+                - 101
+                - 46
+            ok: true
+        required:
+            - ok
+            - error
+    ServersGetHealthResponseBody:
+        title: ServersGetHealthResponseBody
+        type: object
+        properties:
+            msg:
+                type: string
+                description: message
+                example: Qui iusto.
+        example:
+            msg: Ad est.
+    ServersUploadRequestBody:
+        title: ServersUploadRequestBody
+        type: object
+        properties:
+            image:
+                type: string
+                description: image in byte array
+                example:
+                    - 83
+                    - 105
+                    - 116
+                    - 32
+                    - 108
+                    - 105
+                    - 98
+                    - 101
+                    - 114
+                    - 111
+                    - 32
+                    - 97
+                    - 117
+                    - 116
+                    - 46
+                format: byte
+            uuid:
+                type: string
+                description: unique userid
+                example: "1"
+                minLength: 1
+        example:
+            image:
+                - 83
+                - 105
+                - 116
+                - 32
+                - 114
+                - 101
+                - 105
+                - 99
+                - 105
+                - 101
+                - 110
+                - 100
+                - 105
+                - 115
+                - 32
+                - 109
+                - 111
+                - 108
+                - 101
+                - 115
+                - 116
+                - 105
+                - 97
+                - 101
+                - 32
+                - 101
+                - 116
+                - 32
+                - 118
+                - 101
+                - 110
+                - 105
+                - 97
+                - 109
+                - 46
+            uuid: "1"
+        required:
+            - image
+            - uuid
+    ServersUploadResponseBody:
+        title: ServersUploadResponseBody
+        type: object
+        properties:
+            error:
+                type: string
+                description: error reason
+                example: Deserunt necessitatibus minus.
+            image:
+                type: string
+                description: image in []byte
+                example:
+                    - 86
+                    - 101
+                    - 114
+                    - 111
+                    - 32
+                    - 100
+                    - 111
+                    - 108
+                    - 111
+                    - 114
+                    - 32
+                    - 100
+                    - 111
+                    - 108
+                    - 111
+                    - 114
+                    - 101
+                    - 115
+                    - 32
+                    - 100
+                    - 111
+                    - 108
+                    - 111
+                    - 114
+                    - 101
+                    - 109
+                    - 113
+                    - 117
+                    - 101
+                    - 32
+                    - 112
+                    - 101
+                    - 114
+                    - 115
+                    - 112
+                    - 105
+                    - 99
+                    - 105
+                    - 97
+                    - 116
+                    - 105
+                    - 115
+                    - 32
+                    - 101
+                    - 117
+                    - 109
+                    - 46
+                format: byte
+            ok:
+                type: boolean
+                description: operation successful?
+                example: true
+        example:
+            error: Corrupti natus optio.
+            image:
+                - 68
+                - 111
+                - 108
+                - 111
+                - 114
+                - 105
+                - 98
+                - 117
+                - 115
+                - 32
+                - 111
+                - 100
+                - 105
+                - 116
+                - 32
+                - 99
+                - 111
+                - 110
+                - 115
+                - 101
+                - 99
+                - 116
+                - 101
+                - 116
+                - 117
+                - 114
+                - 32
+                - 100
+                - 111
+                - 108
+                - 111
+                - 114
+                - 101
+                - 115
+                - 32
+                - 105
+                - 117
+                - 114
+                - 101
+                - 46
+            ok: true
+        required:
+            - ok
+            - error

@@ -67,7 +67,7 @@ var HealthAuth = Type("Health", func() {
 })
 
 var _ = Service("servers", func() {
-	Description("ksctl server handlers")
+	Description("server handlers")
 
 	Method("login", func() {
 		Payload(ReqAuth)

@@ -150,7 +150,7 @@ func ParseEndpoint(
 
 // serversUsage displays the usage of the servers command and its subcommands.
 func serversUsage() {
-	fmt.Fprintf(os.Stderr, `ksctl server handlers
+	fmt.Fprintf(os.Stderr, `server handlers
 Usage:
     %[1]s [globalflags] servers COMMAND [flags]
 

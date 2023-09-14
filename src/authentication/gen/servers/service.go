@@ -12,7 +12,7 @@ import (
 	"context"
 )
 
-// ksctl server handlers
+// server handlers
 type Service interface {
 	// Login implements login.
 	Login(context.Context, *Request) (res *Response, err error)

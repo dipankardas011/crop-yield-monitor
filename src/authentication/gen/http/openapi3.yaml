@@ -175,4 +175,4 @@ components:
                 password: "77777"
 tags:
     - name: servers
-      description: ksctl server handlers
+      description: server handlers

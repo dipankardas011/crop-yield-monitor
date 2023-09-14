@@ -20,7 +20,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Health'
                             example:
-                                msg: Magni cum eos maxime libero labore odio.
+                                msg: Cum maiores sit voluptatibus et similique nulla.
     /openapi3.json:
         get:
             tags:
@@ -52,12 +52,16 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Recommendations'
                             example:
-                                error: Voluptatem consequatur mollitia sapiente ipsum molestiae reprehenderit.
+                                error: Reprehenderit enim rerum minus sit rerum et.
                                 ok: false
                                 recommendations:
-                                    crops: Rerum minus sit rerum et neque.
-                                    need_water: false
-                                waiting: false
+                                    crops:
+                                        - Magnam magni cum eos maxime libero.
+                                        - Odio totam suscipit dolore quia incidunt aut.
+                                        - Nostrum ut libero rerum nam minima.
+                                        - Soluta odio.
+                                    need_water: true
+                                waiting: true
     /swaggerui/{*path}:
         get:
             tags:
@@ -82,9 +86,9 @@ components:
                 msg:
                     type: string
                     description: message
-                    example: Est ducimus aut itaque ea qui.
+                    example: Animi reprehenderit quisquam omnis.
             example:
-                msg: Et ut et incidunt.
+                msg: Vel ipsam mollitia voluptatem et non.
         PredictRequestBody:
             type: object
             properties:
@@ -103,35 +107,48 @@ components:
                 error:
                     type: string
                     description: error reason
-                    example: Quis dolorem quam earum dolores.
+                    example: Velit ab dignissimos ut deserunt similique eius.
                 ok:
                     type: boolean
                     description: operation successful?
-                    example: false
+                    example: true
                 recommendations:
                     type: object
                     properties:
                         crops:
-                            type: string
-                            example: Autem sunt adipisci architecto tempore.
+                            type: array
+                            items:
+                                type: string
+                                example: Occaecati quam.
+                            description: recommended crops
+                            example:
+                                - Consequatur commodi.
+                                - Quasi incidunt qui.
+                                - Quam est.
+                                - Laborum doloribus eligendi aut et sit ea.
                         need_water:
                             type: boolean
                             example: true
                     description: recommendations
                     example:
-                        crops: Fuga magni odit.
+                        crops:
+                            - Omnis distinctio quia eius nobis.
+                            - Voluptatem doloribus ipsa porro deserunt qui.
                         need_water: false
                 waiting:
                     type: boolean
                     description: processing in progress
-                    example: false
+                    example: true
             example:
-                error: At quaerat id cupiditate veniam facere et.
+                error: Consequatur autem dignissimos aut cupiditate sit architecto.
                 ok: true
                 recommendations:
-                    crops: Et quis ex exercitationem at vel est.
+                    crops:
+                        - Sit soluta incidunt animi officia libero.
+                        - Sequi cumque velit itaque dolorum odit dolore.
+                        - Et porro veniam praesentium hic quae.
                     need_water: false
-                waiting: false
+                waiting: true
             required:
                 - ok
                 - error

@@ -38,9 +38,7 @@ var ResultPred = Type("Recommendations", func() {
 	Attribute("recommendations", func() {
 		Description("recommendations")
 
-		Attribute("crops", func() {
-			ArrayOf(String)
-		})
+		Attribute("crops", ArrayOf(String), "recommended crops", func() {})
 
 		Attribute("need_water", Boolean)
 

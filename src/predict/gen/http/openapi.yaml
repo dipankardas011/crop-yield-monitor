@@ -138,9 +138,9 @@ definitions:
             msg:
                 type: string
                 description: message
-                example: Tenetur cumque ipsum debitis ipsam velit est.
+                example: Debitis voluptas aut vero nulla et quibusdam.
         example:
-            msg: Reprehenderit nulla incidunt fuga omnis.
+            msg: Dolores et optio velit aut.
     ServersPredictRequestBody:
         title: ServersPredictRequestBody
         type: object
@@ -161,33 +161,45 @@ definitions:
             error:
                 type: string
                 description: error reason
-                example: Libero rerum nam minima nulla soluta.
+                example: Molestiae iure cumque voluptatem est.
             ok:
                 type: boolean
                 description: operation successful?
-                example: false
+                example: true
             recommendations:
                 type: object
                 properties:
                     crops:
-                        type: string
-                        example: Enim dolorem cum.
+                        type: array
+                        items:
+                            type: string
+                            example: Quia commodi dolor tenetur cumque.
+                        description: recommended crops
+                        example:
+                            - Ipsam velit est eius reprehenderit nulla incidunt.
+                            - Omnis assumenda nam accusamus.
+                            - Dolorem quam earum dolores.
+                            - Autem sunt adipisci architecto tempore.
                     need_water:
                         type: boolean
                         example: true
                 description: recommendations
                 example:
-                    crops: Voluptatibus et similique nulla quasi.
-                    need_water: false
+                    crops:
+                        - Magni odit quia officiis modi assumenda at.
+                        - Id cupiditate veniam facere et possimus.
+                    need_water: true
             waiting:
                 type: boolean
                 description: processing in progress
-                example: false
+                example: true
         example:
-            error: Quod ea assumenda placeat.
-            ok: false
+            error: At vel est.
+            ok: true
             recommendations:
-                crops: Iure cumque voluptatem est atque quia.
+                crops:
+                    - Est ducimus aut itaque ea qui.
+                    - Et ut et incidunt.
                 need_water: true
             waiting: true
         required:

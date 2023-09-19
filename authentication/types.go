@@ -9,9 +9,20 @@ type AccountSignUp struct {
 	Email    string `json:"emailid"`
 }
 
+type AccountSignInRes struct {
+	Uuid        string `json:"uuid"`
+	AccessToken string `json:"token"`
+}
+
 type AccountSignIn struct {
 	UserName string `json:"username"`
 	Password string `json:"password"`
+}
+
+type Response struct {
+	Stdout  string `json:"stdout"`
+	Error   string `json:"error"`
+	Account any
 }
 
 func (this AccountSignUp) String() string {

@@ -8,32 +8,40 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ErrorMsg string
+
+func (e ErrorMsg) String() string {
+	return string(e)
+}
+
+const (
+	BadJsonFormat       ErrorMsg = "[Err] wrong json format"
+	InternalServerError ErrorMsg = "[Err] internal server error"
+)
+
 func SignUp(ctx *gin.Context) {
 	account := AccountSignUp{}
 	if err := ctx.BindJSON(&account); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": fmt.Sprintf("Bad Request format, [%v]", err),
-		})
+		ctx.JSON(http.StatusBadRequest, Response{Error: BadJsonFormat.String()})
 	}
 	fmt.Println(account)
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "account created successfully",
-	})
+	ctx.JSON(http.StatusOK, Response{Stdout: "signup successful"})
 }
 
 func SignIn(ctx *gin.Context) {
 	account := AccountSignIn{}
 	if err := ctx.BindJSON(&account); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": fmt.Sprintf("Bad Request format, [%v]", err),
-		})
+		ctx.JSON(http.StatusBadRequest, Response{Error: BadJsonFormat.String()})
 	}
 	fmt.Println(account)
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"usertoken": "32qwe32413212211(dummy)",
-		"message":   "signin successful",
+	ctx.JSON(http.StatusOK, Response{
+		Stdout: "logged in",
+		Account: AccountSignInRes{
+			Uuid:        "abcd23e23",
+			AccessToken: "32qwe32413212211(dummy)",
+		},
 	})
 }
 

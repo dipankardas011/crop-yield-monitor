@@ -11,29 +11,9 @@
 # Demo Try
 
 ```bash
-cd src/
+make build
 
-cd authentication
-docker build -t auth .
-docker run -p 8080:8080 auth
-cd -
+make run
 
-cd predict
-docker build -t predict .
-docker run -p 8082:8082 predict
-
-cd -
-
-cd images
-docker build -t images .
-docker run -p 8081:8081 images
-
-cd -
+make destroy_all
 ```
-
-to try the routes
-go to webbroswer
-
-0.0.0.0:8080/swaggerui
-0.0.0.0:8081/swaggerui
-0.0.0.0:8082/swaggerui

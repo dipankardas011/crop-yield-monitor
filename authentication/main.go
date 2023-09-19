@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,6 +41,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
+	r.Use(cors.Default())
 	r.POST("/account/signin", SignIn)
 	r.POST("/account/signup", SignUp)
 	r.GET("/account/healthz", func(ctx *gin.Context) {
@@ -47,7 +49,7 @@ func main() {
 			"message": "auth looks healthy",
 		})
 	})
-	r.GET("/docs", func(ctx *gin.Context) {
+	r.GET("/account/docs", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"signin": "/account/signin",
 			"signup": "/account/signup",

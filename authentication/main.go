@@ -54,8 +54,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(Response{
 		Stdout: "signup successful",
 		Account: AccountSignInRes{
-			Uuid:        "abcd23e23",
-			AccessToken: "32qwe32413212211(dummy)",
+			Uuid: "abcd23e23",
 		},
 	}); err != nil {
 		log.Println("unable to encode the response")
@@ -127,11 +126,9 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusAccepted)
 	if err := json.NewEncoder(w).Encode(Response{
-		Stdout: "logged in",
+		Stdout: "logged in do refer to cache for more getting the tokens",
 		Account: AccountSignInRes{
-			Uuid:        "abcd23e23",
-			AccessToken: tokenString,
-			ExpTime:     expirationTime,
+			Uuid: "abcd23e23",
 		},
 	}); err != nil {
 		log.Println("unable to encode the response")

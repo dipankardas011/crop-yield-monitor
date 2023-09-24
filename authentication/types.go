@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 )
@@ -15,9 +14,9 @@ type AccountSignUp struct {
 }
 
 type AccountSignInRes struct {
-	Uuid        string    `json:"uuid"`
-	AccessToken string    `json:"token"`
-	ExpTime     time.Time `json:"expiration"`
+	Uuid string `json:"uuid"`
+	// AccessToken string    `json:"token"`
+	// ExpTime     time.Time `json:"expiration"`
 }
 
 type AccountSignIn struct {

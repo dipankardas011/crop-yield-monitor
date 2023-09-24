@@ -24,68 +24,55 @@ const (
 var jwtKey []byte
 
 // SignUp HTTP("POST")
-func SignUp(w http.ResponseWriter, r *http.Request) {
+func SignUp(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method != http.MethodPost {
-		log.Printf("Method [%s]: /account/signup\t%v\n", r.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
-		return
-	}
-
-	if r.Header.Get("Content-type") != "application/json" {
-		log.Println("Content-type not json")
-		http.Error(w, "Bad Content-type require json", http.StatusBadRequest)
-		return
+		return apiError{Err: "Bad Method, expected POST", Status: http.StatusMethodNotAllowed}
 	}
 
 	account := AccountSignUp{}
 	if err := json.NewDecoder(r.Body).Decode(&account); err != nil {
-		log.Println("failed to decode the json body")
-		http.Error(w, BadJsonFormat.String()+"\nReason: "+err.Error(), http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: BadJsonFormat.String() + "\nReason: " + err.Error()}
 	}
+
+	defer log.Printf("Method [%s]: /account/signup\t%d\n", r.Method, http.StatusOK)
 	fmt.Println(account)
 
-	w.WriteHeader(http.StatusAccepted)
-	if err := json.NewEncoder(w).Encode(Response{
+	return writeJson(w, http.StatusOK, Response{
 		Stdout: "signup successful",
 		Account: AccountSignInRes{
 			Uuid: "abcd23e23",
 		},
-	}); err != nil {
-		log.Println("unable to encode the response")
-		http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("Method [%s]: /account/signup\t%d\n", r.Method, http.StatusOK)
+	})
+	// w.WriteHeader(http.StatusAccepted)
+	// if err := json.NewEncoder(w).Encode(Response{
+	// 	Stdout: "signup successful",
+	// 	Account: AccountSignInRes{
+	// 		Uuid: "abcd23e23",
+	// 	},
+	// }); err != nil {
+	// 	log.Println("unable to encode the response")
+	// 	http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 }
 
 // SignIn HTTP("POST")
-func SignIn(w http.ResponseWriter, r *http.Request) {
+func SignIn(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method != http.MethodPost {
-		log.Printf("Method [%s]: /account/signin\t%v\n", r.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
-		return
-	}
-	if r.Header.Get("Content-type") != "application/json" {
-		log.Println("Content-type not json")
-		http.Error(w, "Bad Content-type require json", http.StatusBadRequest)
-		return
+		return apiError{Err: "Bad Method, expected POST", Status: http.StatusMethodNotAllowed}
 	}
 
 	account := AccountSignIn{}
 	if err := json.NewDecoder(r.Body).Decode(&account); err != nil {
-		log.Println("failed to decode the json body")
-		http.Error(w, BadJsonFormat.String()+"\nReason: "+err.Error(), http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: BadJsonFormat.String() + "\nReason: " + err.Error()}
 	}
 
 	if account.Password != "1234" || account.UserName != "dipankar" {
-		log.Println("wrong password or username")
-		http.Error(w, "Wrong password or username", http.StatusUnauthorized)
-		return
+		return apiError{Err: "wrong password or username", Status: http.StatusUnauthorized}
 	}
+
 	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &Claims{
 		Username: account.UserName,
@@ -96,9 +83,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		log.Println("signing token failed", err)
-		http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
-		return
+		return apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
 
 	// Finally, we set the client cookie for "token" as the JWT we just generated
@@ -111,39 +96,28 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(account)
 
-	w.WriteHeader(http.StatusAccepted)
-	if err := json.NewEncoder(w).Encode(Response{
+	return writeJson(w, http.StatusOK, Response{
 		Stdout: "logged in do refer to cache for more getting the tokens",
 		Account: AccountSignInRes{
 			Uuid: "abcd23e23",
 		},
-	}); err != nil {
-		log.Println("unable to encode the response")
-		http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("Method [%s]: /account/signin\t%d\n", r.Method, http.StatusOK)
+	})
 }
 
 // Welcome HTTP("GET")
-func Welcome(w http.ResponseWriter, r *http.Request) {
+func Welcome(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method != http.MethodGet {
-		log.Printf("Method [%s]: /account/welcome\t%v\n", r.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method use GET", http.StatusBadRequest)
-		return
+		return apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
 	}
 	// We can obtain the session token from the requests cookies, which come with every request
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 		}
 		// For any other type of error, return a bad request status
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
 
 	// Get the JWT string from the cookie
@@ -160,36 +134,29 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
 	if !tkn.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+		return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 	}
-	w.Write([]byte(fmt.Sprintf("{\"msg\":\"Welcome %s\"}", claims.Username)))
+	return writeJson(w, http.StatusOK, struct{ Msg string }{Msg: "Welcome " + claims.Username})
 }
 
 // Refresh HTTP("POST")
-func Refresh(w http.ResponseWriter, r *http.Request) {
+func Refresh(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method != http.MethodPost {
-		log.Printf("Method [%s]: /account/renew\t%v\n", r.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
-		return
+		return apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
 	}
 	// (BEGIN) The code until this point is the same as the first part of the `Welcome` route
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
 	tknStr := c.Value
 	claims := &Claims{}
@@ -198,23 +165,19 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
 	if !tkn.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+		return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 	}
 
 	// We ensure that a new token is not issued until enough time has elapsed
 	// In this case, a new token will only be issued if the old token is within
 	// 30 seconds of expiry. Otherwise, return a bad request status
 	if time.Until(claims.ExpiresAt.Time) > 30*time.Second {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: "a new token will only be issued if the old token is within 30 seconds of expiry"}
 	}
 
 	// Now, create a new token for the current use, with a renewed expiration time
@@ -225,8 +188,7 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return apiError{Status: http.StatusInternalServerError, Err: err.Error()}
 	}
 
 	// Set the new token as the users `token` cookie
@@ -236,26 +198,22 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 		Expires: expirationTime,
 	})
 
-	w.Write([]byte(fmt.Sprintf("{\"msg\":\"Refreshed token for user=%s\"}", claims.Username)))
+	return writeJson(w, http.StatusOK, struct{ Msg string }{Msg: "Refreshed token for user=" + claims.Username})
 }
 
-func Logout(w http.ResponseWriter, r *http.Request) {
+func Logout(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method != http.MethodPost {
-		log.Printf("Method [%s]: /account/renew\t%v\n", r.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
-		return
+		return apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
 	}
 
 	// immediately clear the token cookie
 	_, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return apiError{Status: http.StatusUnauthorized, Err: err.Error()}
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
 	claims := &Claims{}
 
@@ -264,20 +222,51 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now(),
 	})
 
-	w.Write([]byte(fmt.Sprintf("{\"msg\":\"logout success\"}", claims.Username)))
+	return writeJson(w, http.StatusOK, struct{ Msg string }{Msg: "logout success of " + claims.Username})
+}
+
+func Docs(w http.ResponseWriter, r *http.Request) error {
+
+	if r.Method != http.MethodGet {
+		return apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed}
+	}
+	docs := struct {
+		Loc map[string]string
+	}{
+		Loc: map[string]string{
+			"signin": "/account/signin",
+			"signup": "/account/signup",
+			"TODO":   "about payloads",
+		},
+	}
+
+	return writeJson(w, http.StatusOK, docs)
+}
+
+func Health(w http.ResponseWriter, r *http.Request) error {
+
+	if r.Method != http.MethodGet {
+		return apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed}
+	}
+
+	type Health struct {
+		Msg string `json:"message"`
+	}
+
+	return writeJson(w, http.StatusOK, Health{Msg: "auth looks healthy"})
 }
 
 func main() {
 
 	jwtKey = []byte(generateRandomToken(20))
 
-	mux := http.NewServeMux()
+	// mux := http.NewServeMux()
 
-	mux.HandleFunc("/account/signin", SignIn)
-	mux.HandleFunc("/account/signup", SignUp)
-	mux.HandleFunc("/account/logout", Logout)
-	mux.HandleFunc("/account/welcome", Welcome)
-	mux.HandleFunc("/account/renew", Refresh)
+	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn))
+	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp))
+	http.HandleFunc("/account/logout", makeHTTPHandler(Logout))
+	http.HandleFunc("/account/welcome", makeHTTPHandler(Welcome))
+	http.HandleFunc("/account/renew", makeHTTPHandler(Refresh))
 	fmt.Println(`
 POST /account/signin
 POST /account/signup
@@ -285,58 +274,17 @@ POST /account/logout
 GET /account/welcome
 POST /account/renew`)
 
-	mux.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/account", makeHTTPHandler(Docs))
 
-		if r.Method != http.MethodGet {
-			log.Printf("Method [%s]: /account\t%v\n", r.Method, http.StatusBadRequest)
-			http.Error(w, "Bad Method use GET", http.StatusBadRequest)
-			return
-		}
-		docs := struct {
-			Loc map[string]string
-		}{
-			Loc: map[string]string{
-				"signin": "/account/signin",
-				"signup": "/account/signup",
-				"TODO":   "about payloads",
-			},
-		}
+	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))
 
-		if err := json.NewEncoder(w).Encode(docs); err != nil {
-			http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("Method [%s]: /account\t%d\n", r.Method, http.StatusOK)
-	})
-
-	mux.HandleFunc("/account/healthz", func(w http.ResponseWriter, r *http.Request) {
-
-		if r.Method != http.MethodGet {
-			log.Printf("Method [%s]: /account\t%v\n", r.Method, http.StatusBadRequest)
-			http.Error(w, "Bad Method use GET", http.StatusBadRequest)
-			return
-		}
-
-		type Health struct {
-			Msg string `json:"message"`
-		}
-		if err := json.NewEncoder(w).Encode(Health{Msg: "auth looks healthy"}); err != nil {
-			http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("Method [%s]: /account/healthz\t%d\n", r.Method, http.StatusOK)
-	})
-
-	wrappedMux := NewLogger(mux)
+	// wrappedMux := NewLogger(mux)
 
 	s := &http.Server{
 		Addr:           ":8080",
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
-		Handler:        wrappedMux,
 	}
 
 	log.Printf("Started to serve the authorization server on port {%v}\n", s.Addr)
@@ -345,43 +293,43 @@ POST /account/renew`)
 	}
 }
 
-// Logger is a middleware handler that does request logging
-type Logger struct {
-	handler http.Handler
+func writeJson(w http.ResponseWriter, statusCode int, data any) error {
+	w.WriteHeader(statusCode)
+
+	return json.NewEncoder(w).Encode(data)
 }
 
-func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.URL.RequestURI())
-	start := time.Now()
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Accept", "application/json; charset=utf-8")
-	w.Header().Set("server", "authentication-server")
-
-	l.handler.ServeHTTP(w, r)
-	log.Printf("[%s] %s %v", r.Method, r.URL.Path, time.Since(start))
+type apiError struct {
+	Status int
+	Err    string
 }
 
-func NewLogger(handlerToWrap http.Handler) *Logger {
-	return &Logger{handlerToWrap}
+func (e apiError) Error() string {
+	return e.Err
 }
 
-// func writeJson(w http.ResponseWriter, statusCode int, data any) error {
-// 	w.WriteHeader(statusCode)
-//
-// 	return json.NewEncoder(w).Encode(data)
-// }
-//
-// type apiError struct {
-// 	status int
-// 	err    string
-// }
-//
-// func (e apiError) Error() string {
-// 	return e.err
-// }
-//
-// type apiFunc func(http.ResponseWriter, *http.Response) error
-//
-// func makeHTTPHandler(f apiFunc) http.Handler {}
+type apiFunc func(http.ResponseWriter, *http.Request) error
+
+func makeHTTPHandler(f apiFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		log.Printf("[%s] %s ⚡", r.Method, r.URL.Path)
+		start := time.Now()
+
+		defer log.Printf("[%s] %s %v", r.Method, r.URL.Path, time.Since(start))
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Accept", "application/json; charset=utf-8")
+		w.Header().Set("server", "authentication-server")
+
+		if err := f(w, r); err != nil {
+			log.Println(err)
+
+			if e, ok := err.(apiError); ok {
+				writeJson(w, e.Status, Response{Error: e.Error()})
+			} else {
+				writeJson(w, http.StatusInternalServerError, Response{Error: err.Error()})
+			}
+		}
+	}
+}

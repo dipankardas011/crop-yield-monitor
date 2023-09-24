@@ -25,12 +25,8 @@ var jwtKey []byte
 
 // SignUp HTTP("POST")
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-	switch r.Method {
-	case http.MethodPost:
-		log.Printf("Method [%s]: /account/signup\tTRIGGERED\n", r.Method)
-	default:
+	if r.Method != http.MethodPost {
 		log.Printf("Method [%s]: /account/signup\t%v\n", r.Method, http.StatusBadRequest)
 		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
 		return
@@ -67,12 +63,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 // SignIn HTTP("POST")
 func SignIn(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	switch r.Method {
-	case http.MethodPost:
-		log.Printf("Method [%s]: /account/signin\tTRIGGERED\n", r.Method)
-	default:
+	if r.Method != http.MethodPost {
 		log.Printf("Method [%s]: /account/signin\t%v\n", r.Method, http.StatusBadRequest)
 		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
 		return
@@ -89,8 +80,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, BadJsonFormat.String()+"\nReason: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	////////////////// JWT
 
 	if account.Password != "1234" || account.UserName != "dipankar" {
 		log.Println("wrong password or username")
@@ -120,8 +109,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		Expires: expirationTime,
 	})
 
-	////////////////// JWT
-
 	log.Println(account)
 
 	w.WriteHeader(http.StatusAccepted)
@@ -140,12 +127,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 // Welcome HTTP("GET")
 func Welcome(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-	switch r.Method {
-	case http.MethodGet:
-		log.Printf("Method [%s]: /account/welcome\tTRIGGERED\n", r.Method)
-	default:
+	if r.Method != http.MethodGet {
 		log.Printf("Method [%s]: /account/welcome\t%v\n", r.Method, http.StatusBadRequest)
 		http.Error(w, "Bad Method use GET", http.StatusBadRequest)
 		return
@@ -193,12 +176,7 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 // Refresh HTTP("POST")
 func Refresh(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	switch r.Method {
-	case http.MethodPost:
-		log.Printf("Method [%s]: /account/renew\tTRIGGERED\n", r.Method)
-	default:
+	if r.Method != http.MethodPost {
 		log.Printf("Method [%s]: /account/renew\t%v\n", r.Method, http.StatusBadRequest)
 		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
 		return
@@ -263,12 +241,7 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 
 func Logout(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	switch r.Method {
-	case http.MethodPost:
-		log.Printf("Method [%s]: /account/renew\tTRIGGERED\n", r.Method)
-	default:
+	if r.Method != http.MethodPost {
 		log.Printf("Method [%s]: /account/renew\t%v\n", r.Method, http.StatusBadRequest)
 		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
 		return
@@ -298,18 +271,13 @@ func main() {
 
 	jwtKey = []byte(generateRandomToken(20))
 
-	s := &http.Server{
-		Addr:           ":8080",
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/account/signin", SignIn)
-	http.HandleFunc("/account/signup", SignUp)
-	http.HandleFunc("/account/logout", Logout)
-	http.HandleFunc("/account/welcome", Welcome)
-	http.HandleFunc("/account/renew", Refresh)
+	mux.HandleFunc("/account/signin", SignIn)
+	mux.HandleFunc("/account/signup", SignUp)
+	mux.HandleFunc("/account/logout", Logout)
+	mux.HandleFunc("/account/welcome", Welcome)
+	mux.HandleFunc("/account/renew", Refresh)
 	fmt.Println(`
 POST /account/signin
 POST /account/signup
@@ -317,13 +285,9 @@ POST /account/logout
 GET /account/welcome
 POST /account/renew`)
 
-	http.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	mux.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
 
-		switch r.Method {
-		case http.MethodGet:
-			log.Printf("Method [%s]: /account\tTRIGGERED\n", r.Method)
-		default:
+		if r.Method != http.MethodGet {
 			log.Printf("Method [%s]: /account\t%v\n", r.Method, http.StatusBadRequest)
 			http.Error(w, "Bad Method use GET", http.StatusBadRequest)
 			return
@@ -346,13 +310,9 @@ POST /account/renew`)
 		log.Printf("Method [%s]: /account\t%d\n", r.Method, http.StatusOK)
 	})
 
-	http.HandleFunc("/account/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	mux.HandleFunc("/account/healthz", func(w http.ResponseWriter, r *http.Request) {
 
-		switch r.Method {
-		case http.MethodGet:
-			log.Printf("Method [%s]: /account\tTRIGGERED\n", r.Method)
-		default:
+		if r.Method != http.MethodGet {
 			log.Printf("Method [%s]: /account\t%v\n", r.Method, http.StatusBadRequest)
 			http.Error(w, "Bad Method use GET", http.StatusBadRequest)
 			return
@@ -369,8 +329,59 @@ POST /account/renew`)
 		log.Printf("Method [%s]: /account/healthz\t%d\n", r.Method, http.StatusOK)
 	})
 
+	wrappedMux := NewLogger(mux)
+
+	s := &http.Server{
+		Addr:           ":8080",
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+		Handler:        wrappedMux,
+	}
+
 	log.Printf("Started to serve the authorization server on port {%v}\n", s.Addr)
 	if err := s.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
+
+// Logger is a middleware handler that does request logging
+type Logger struct {
+	handler http.Handler
+}
+
+func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.URL.RequestURI())
+	start := time.Now()
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Accept", "application/json; charset=utf-8")
+	w.Header().Set("server", "authentication-server")
+
+	l.handler.ServeHTTP(w, r)
+	log.Printf("[%s] %s %v", r.Method, r.URL.Path, time.Since(start))
+}
+
+func NewLogger(handlerToWrap http.Handler) *Logger {
+	return &Logger{handlerToWrap}
+}
+
+// func writeJson(w http.ResponseWriter, statusCode int, data any) error {
+// 	w.WriteHeader(statusCode)
+//
+// 	return json.NewEncoder(w).Encode(data)
+// }
+//
+// type apiError struct {
+// 	status int
+// 	err    string
+// }
+//
+// func (e apiError) Error() string {
+// 	return e.err
+// }
+//
+// type apiFunc func(http.ResponseWriter, *http.Response) error
+//
+// func makeHTTPHandler(f apiFunc) http.Handler {}

@@ -27,16 +27,19 @@ func SignUp(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Method [%s]: /account/signup\tTRIGGERED\n", req.Method)
 	default:
 		log.Printf("Method [%s]: /account/signup\t%v\n", req.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method used use POST", http.StatusBadRequest)
+		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
 		return
 	}
+
 	if req.Header.Get("Content-type") != "application/json" {
+		log.Println("Content-type not json")
 		http.Error(w, "Bad Content-type require json", http.StatusBadRequest)
 		return
 	}
 
 	account := AccountSignUp{}
 	if err := json.NewDecoder(req.Body).Decode(&account); err != nil {
+		log.Println("failed to decode the json body")
 		http.Error(w, BadJsonFormat.String()+"\nReason: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -50,6 +53,7 @@ func SignUp(w http.ResponseWriter, req *http.Request) {
 			AccessToken: "32qwe32413212211(dummy)",
 		},
 	}); err != nil {
+		log.Println("unable to encode the response")
 		http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -65,16 +69,18 @@ func SignIn(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Method [%s]: /account/signin\tTRIGGERED\n", req.Method)
 	default:
 		log.Printf("Method [%s]: /account/signin\t%v\n", req.Method, http.StatusBadRequest)
-		http.Error(w, "Bad Method used use POST", http.StatusBadRequest)
+		http.Error(w, "Bad Method use POST", http.StatusBadRequest)
 		return
 	}
 	if req.Header.Get("Content-type") != "application/json" {
+		log.Println("Content-type not json")
 		http.Error(w, "Bad Content-type require json", http.StatusBadRequest)
 		return
 	}
 
 	account := AccountSignIn{}
 	if err := json.NewDecoder(req.Body).Decode(&account); err != nil {
+		log.Println("failed to decode the json body")
 		http.Error(w, BadJsonFormat.String()+"\nReason: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -89,6 +95,7 @@ func SignIn(w http.ResponseWriter, req *http.Request) {
 			AccessToken: "32qwe32413212211(dummy)",
 		},
 	}); err != nil {
+		log.Println("unable to encode the response")
 		http.Error(w, InternalServerError.String()+"\nReason: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -97,22 +104,6 @@ func SignIn(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 
-	// r.Use(cors.Default())
-	// r.POST("/account/signin", SignIn)
-	// r.POST("/account/signup", SignUp)
-	// r.GET("/account/healthz", func(ctx *gin.Context) {
-	// 	ctx.JSON(http.StatusOK, gin.H{
-	// 		"message": "auth looks healthy",
-	// 	})
-	// })
-	// r.GET("/account/docs", func(ctx *gin.Context) {
-	// 	ctx.JSON(http.StatusOK, gin.H{
-	// 		"signin": "/account/signin",
-	// 		"signup": "/account/signup",
-	// 		"TODO":   "about payloads",
-	// 	})
-	// })
-	//
 	s := &http.Server{
 		Addr:           ":8080",
 		ReadTimeout:    10 * time.Second,
@@ -131,7 +122,7 @@ func main() {
 			log.Printf("Method [%s]: /account\tTRIGGERED\n", r.Method)
 		default:
 			log.Printf("Method [%s]: /account\t%v\n", r.Method, http.StatusBadRequest)
-			http.Error(w, "Bad Method used use GET", http.StatusBadRequest)
+			http.Error(w, "Bad Method use GET", http.StatusBadRequest)
 			return
 		}
 		docs := struct {
@@ -160,7 +151,7 @@ func main() {
 			log.Printf("Method [%s]: /account\tTRIGGERED\n", r.Method)
 		default:
 			log.Printf("Method [%s]: /account\t%v\n", r.Method, http.StatusBadRequest)
-			http.Error(w, "Bad Method used use GET", http.StatusBadRequest)
+			http.Error(w, "Bad Method use GET", http.StatusBadRequest)
 			return
 		}
 

@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+
+	jwt "github.com/golang-jwt/jwt/v5"
+)
 
 type AccountSignUp struct {
 	Name     string `json:"name"`
@@ -10,8 +15,9 @@ type AccountSignUp struct {
 }
 
 type AccountSignInRes struct {
-	Uuid        string `json:"uuid"`
-	AccessToken string `json:"token"`
+	Uuid        string    `json:"uuid"`
+	AccessToken string    `json:"token"`
+	ExpTime     time.Time `json:"expiration"`
 }
 
 type AccountSignIn struct {
@@ -31,4 +37,11 @@ func (this AccountSignUp) String() string {
 
 func (this AccountSignIn) String() string {
 	return fmt.Sprintf("{username: %s, password: %s}\n", this.UserName, this.Password)
+}
+
+// Create a struct that will be encoded to a JWT.
+// We add jwt.RegisteredClaims as an embedded type, to provide fields like expiry time
+type Claims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
 }

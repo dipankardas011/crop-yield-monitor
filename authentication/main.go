@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -36,7 +35,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 
 	defer log.Printf("Method [%s]: /account/signup\t%d\n", r.Method, http.StatusOK)
-	fmt.Println(account)
+	log.Println(account)
 
 	return writeJson(w, http.StatusOK, Response{
 		Stdout: "signup successful",
@@ -248,12 +247,6 @@ func Health(w http.ResponseWriter, r *http.Request) (int, error) {
 func main() {
 
 	jwtKey = []byte(generateRandomToken(20))
-	fmt.Println(`
-		POST /account/signin
-		POST /account/signup
-		POST /account/logout
-		GET /account/welcome
-		POST /account/renew`)
 
 	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn))
 	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp))

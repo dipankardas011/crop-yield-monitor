@@ -129,7 +129,7 @@ func Welcome(w http.ResponseWriter, r *http.Request) (int, error) {
 	if !tkn.Valid {
 		return http.StatusUnauthorized, err
 	}
-	return writeJson(w, http.StatusOK, struct{ Msg string }{Msg: "Welcome " + claims.Username})
+	return writeJson(w, http.StatusOK, Response{Stdout: "Welcome " + claims.Username})
 }
 
 // Refresh HTTP("POST")
@@ -186,7 +186,7 @@ func Refresh(w http.ResponseWriter, r *http.Request) (int, error) {
 		Expires: expirationTime,
 	})
 
-	return writeJson(w, http.StatusOK, struct{ Msg string }{Msg: "Refreshed token for user=" + claims.Username})
+	return writeJson(w, http.StatusOK, Response{Stdout: "Refreshed token for user=" + claims.Username})
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -210,7 +210,7 @@ func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 		Expires: time.Now(),
 	})
 
-	return writeJson(w, http.StatusOK, struct{ Msg string }{Msg: "logout success of " + claims.Username})
+	return writeJson(w, http.StatusOK, Response{Stdout: "logout success of " + claims.Username})
 }
 
 func Docs(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -228,7 +228,7 @@ func Docs(w http.ResponseWriter, r *http.Request) (int, error) {
 		},
 	}
 
-	return writeJson(w, http.StatusOK, docs)
+	return writeJson(w, http.StatusOK, Response{Account: docs})
 }
 
 func Health(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -237,11 +237,7 @@ func Health(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusMethodNotAllowed, apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed}
 	}
 
-	type Health struct {
-		Msg string `json:"message"`
-	}
-
-	return writeJson(w, http.StatusOK, Health{Msg: "auth looks healthy"})
+	return writeJson(w, http.StatusOK, Response{Stdout: "auth looks healthy"})
 }
 
 func main() {

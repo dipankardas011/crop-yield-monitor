@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -40,4 +41,23 @@ func writeJson(w http.ResponseWriter, statusCode int, data any) (int, error) {
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
+}
+
+func allowableSizeOfUserInputs(w interface{}) error {
+	switch v := w.(type) {
+	case AccountSignIn:
+		if len(v.UserName) > 20 || len(v.Password) > 20 {
+			return errors.New("length of user <= 20 or password <= 20")
+		}
+	case AccountSignUp:
+		if len(v.UserName) > 20 || len(v.Password) > 20 {
+			return errors.New("length of user <= 20 or password <= 20")
+		}
+		if len(v.Name) > 50 || len(v.Email) > 30 {
+			return errors.New("length of name <= 50 or email <= 30")
+		}
+	default:
+		return errors.New("unsupported type")
+	}
+	return nil
 }

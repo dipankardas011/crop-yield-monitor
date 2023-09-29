@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -94,19 +95,11 @@ func SignIn(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
 
-	// Finally, we set the client cookie for "token" as the JWT we just generated
-	// we also set an expiry time which is the same as the token itself
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expirationTime,
-	})
-
-	log.Println(account)
-
 	return writeJson(w, http.StatusOK, Response{
-		Stdout:  "Login Successful",
-		Account: "Check the cookie",
+		Stdout: "Login Successful",
+		Account: struct {
+			Token string `json:"token"`
+		}{Token: tokenString},
 	})
 }
 
@@ -116,15 +109,16 @@ func Refresh(w http.ResponseWriter, r *http.Request) (int, error) {
 	if r.Method != http.MethodPost {
 		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
 	}
-	// (BEGIN) The code until this point is the same as the first part of the `Welcome` route
-	c, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			return http.StatusUnauthorized, err
-		}
-		return http.StatusBadRequest, err
+
+	// Get the JWT token from the Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
 	}
-	tknStr := c.Value
+
+	// Extract the token from the header (assuming Bearer token format)
+	tknStr := strings.TrimPrefix(authHeader, "Bearer ")
+
 	claims := &Claims{}
 	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
 		return jwtKey, nil
@@ -154,17 +148,15 @@ func Refresh(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return http.StatusInternalServerError, apiError{Err: "Failed to generate new token", Status: http.StatusInternalServerError}
 	}
 
-	// Set the new token as the users `token` cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expirationTime,
+	return writeJson(w, http.StatusOK, Response{
+		Stdout: "Refreshed token for user=" + claims.Username,
+		Account: struct {
+			Token string `json:"token"`
+		}{Token: tokenString},
 	})
-
-	return writeJson(w, http.StatusOK, Response{Stdout: "Refreshed token for user=" + claims.Username})
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -173,20 +165,20 @@ func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
 	}
 
-	// immediately clear the token cookie
-	_, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			return http.StatusUnauthorized, err
-		}
-		return http.StatusBadRequest, err
+	// Get the JWT token from the Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
 	}
-	claims := &Claims{}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Expires: time.Now(),
-	})
+	// Extract the token from the header (assuming Bearer token format)
+
+	_ = strings.TrimPrefix(authHeader, "Bearer ")
+
+	// FIXME: to enhance security, you can maintain a blacklist of invalidated tokens on the server-side. When a user logs out, you can add the current token to the blacklist.
+	// 	For each request, you can check if the token in the Authorization header is not in the blacklist before processing the request. This extra step helps prevent the use of invalidated tokens even if they are somehow retained by the client.
+
+	claims := &Claims{}
 
 	return writeJson(w, http.StatusOK, Response{Stdout: "logout success of " + claims.Username})
 }
@@ -200,9 +192,12 @@ func Docs(w http.ResponseWriter, r *http.Request) (int, error) {
 		Loc map[string]string
 	}{
 		Loc: map[string]string{
-			"signin": "/account/signin",
-			"signup": "/account/signup",
-			"TODO":   "about payloads",
+			"[POST] signin":                    "/account/signin",
+			"[POST] signup":                    "/account/signup",
+			"[POST] logout":                    "/account/logout",
+			"[GET] token renew":                "/account/renew",
+			"[GET] authorization bearer token": "/account/token/status",
+			"[GET] Health status":              "/account/healthz",
 		},
 	}
 
@@ -223,18 +218,15 @@ func IsValidToken(w http.ResponseWriter, r *http.Request) (int, error) {
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
 	}
-	// We can obtain the session token from the requests cookies, which come with every request
-	c, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			return http.StatusUnauthorized, err
-		}
-		// For any other type of error, return a bad request status
-		return http.StatusBadRequest, err
+
+	// Get the JWT token from the Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
 	}
 
-	// Get the JWT string from the cookie
-	tknStr := c.Value
+	// Extract the token from the header (assuming Bearer token format)
+	tknStr := strings.TrimPrefix(authHeader, "Bearer ")
 
 	claims := &Claims{}
 

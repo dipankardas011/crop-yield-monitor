@@ -8,6 +8,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
+// FIXME: use the environment variables
 const (
 	DB_NAME      = "auth"
 	DB_CONN_ADDR = "127.0.0.1:3306"
@@ -46,6 +47,11 @@ func (this *DBClient) MySqlNewClient() error {
 	if err != nil {
 		return err
 	}
+	pingErr := this.db.Ping()
+	if pingErr != nil {
+		return fmt.Errorf("Unable to ping the auth db: %v", pingErr)
+	}
+	fmt.Println("Connected with auth db!")
 	return nil
 }
 
@@ -57,9 +63,7 @@ func (this *DBClient) CreateUser(ac AccountSignUp) error {
 
 	// there should be no user with same username
 	if account, err := this.GetUserByUsername(ac.UserName); err != nil {
-		if err == sql.ErrNoRows {
-			log.Println("No user found")
-		} else {
+		if err != sql.ErrNoRows {
 			return err
 		}
 	} else if account != nil {

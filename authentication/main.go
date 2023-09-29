@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -20,7 +22,10 @@ const (
 	InternalServerError ErrorMsg = "[Err] internal server error"
 )
 
-var jwtKey []byte
+var (
+	jwtKey    []byte
+	sqlClient *DBClient
+)
 
 // SignUp HTTP("POST")
 func SignUp(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -34,14 +39,14 @@ func SignUp(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: BadJsonFormat.String() + "\nReason: " + err.Error()}
 	}
 
-	defer log.Printf("Method [%s]: /account/signup\t%d\n", r.Method, http.StatusOK)
 	log.Println(account)
+
+	if err := sqlClient.CreateUser(account); err != nil {
+		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: err.Error()}
+	}
 
 	return writeJson(w, http.StatusOK, Response{
 		Stdout: "signup successful",
-		Account: AccountSignInRes{
-			Uuid: "abcd23e23",
-		},
 	})
 }
 
@@ -57,8 +62,23 @@ func SignIn(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: BadJsonFormat.String() + "\nReason: " + err.Error()}
 	}
 
-	if account.Password != "1234" || account.UserName != "dipankar" {
-		return http.StatusUnauthorized, apiError{Err: "wrong password or username", Status: http.StatusUnauthorized}
+	dbStoredData, err := sqlClient.GetPasswordByUsername(account.UserName)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return http.StatusUnauthorized, apiError{Err: err.Error(), Status: http.StatusUnauthorized}
+		} else {
+			return http.StatusUnauthorized, apiError{Err: "Invalid Username", Status: http.StatusUnauthorized}
+		}
+	}
+
+	if err := func() error {
+		getHash := genHash(account.Password + dbStoredData.salt)
+		if dbStoredData.password != getHash {
+			return errors.New("invalid password")
+		}
+		return nil
+	}(); err != nil {
+		return http.StatusUnauthorized, apiError{Err: err.Error(), Status: http.StatusUnauthorized}
 	}
 
 	expirationTime := time.Now().Add(5 * time.Minute)
@@ -85,51 +105,9 @@ func SignIn(w http.ResponseWriter, r *http.Request) (int, error) {
 	log.Println(account)
 
 	return writeJson(w, http.StatusOK, Response{
-		Stdout: "logged in do refer to cache for more getting the tokens",
-		Account: AccountSignInRes{
-			Uuid: "abcd23e23",
-		},
+		Stdout:  "Login Successful",
+		Account: "Check the cookie",
 	})
-}
-
-// Welcome HTTP("GET")
-func Welcome(w http.ResponseWriter, r *http.Request) (int, error) {
-
-	if r.Method != http.MethodGet {
-		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
-	}
-	// We can obtain the session token from the requests cookies, which come with every request
-	c, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			return http.StatusUnauthorized, err
-		}
-		// For any other type of error, return a bad request status
-		return http.StatusBadRequest, err
-	}
-
-	// Get the JWT string from the cookie
-	tknStr := c.Value
-
-	claims := &Claims{}
-
-	// Parse the JWT string and store the result in `claims`.
-	// Note that we are passing the key in this method as well. This method will return an error
-	// if the token is invalid (if it has expired according to the expiry time we set on sign in),
-	// or if the signature does not match
-	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
-		return jwtKey, nil
-	})
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return http.StatusUnauthorized, err
-		}
-		return http.StatusBadRequest, err
-	}
-	if !tkn.Valid {
-		return http.StatusUnauthorized, err
-	}
-	return writeJson(w, http.StatusOK, Response{Stdout: "Welcome " + claims.Username})
 }
 
 // Refresh HTTP("POST")
@@ -240,6 +218,46 @@ func Health(w http.ResponseWriter, r *http.Request) (int, error) {
 	return writeJson(w, http.StatusOK, Response{Stdout: "auth looks healthy"})
 }
 
+func IsValidToken(w http.ResponseWriter, r *http.Request) (int, error) {
+
+	if r.Method != http.MethodGet {
+		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
+	}
+	// We can obtain the session token from the requests cookies, which come with every request
+	c, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return http.StatusUnauthorized, err
+		}
+		// For any other type of error, return a bad request status
+		return http.StatusBadRequest, err
+	}
+
+	// Get the JWT string from the cookie
+	tknStr := c.Value
+
+	claims := &Claims{}
+
+	// Parse the JWT string and store the result in `claims`.
+	// Note that we are passing the key in this method as well. This method will return an error
+	// if the token is invalid (if it has expired according to the expiry time we set on sign in),
+	// or if the signature does not match
+	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return http.StatusUnauthorized, err
+		}
+		return http.StatusBadRequest, err
+	}
+	if !tkn.Valid {
+		return http.StatusUnauthorized, err
+	}
+
+	return writeJson(w, http.StatusOK, Response{Stdout: "Welcome " + claims.Username})
+}
+
 func main() {
 
 	jwtKey = []byte(generateRandomToken(20))
@@ -247,8 +265,8 @@ func main() {
 	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn))
 	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp))
 	http.HandleFunc("/account/logout", makeHTTPHandler(Logout))
-	http.HandleFunc("/account/welcome", makeHTTPHandler(Welcome))
 	http.HandleFunc("/account/renew", makeHTTPHandler(Refresh))
+	http.HandleFunc("/account/token/status", makeHTTPHandler(IsValidToken))
 
 	http.HandleFunc("/account", makeHTTPHandler(Docs))
 	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))
@@ -258,6 +276,13 @@ func main() {
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+	}
+
+	// create the mysql server client
+	sqlClient = &DBClient{}
+
+	if err := sqlClient.MySqlNewClient(); err != nil {
+		panic(err)
 	}
 
 	log.Printf("Started to serve the authorization server on port {%v}\n", s.Addr)

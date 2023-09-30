@@ -1,0 +1,45 @@
+services:
+  # Databases
+  auth-db:
+    image: auth-db
+    networks:
+    - backend-net
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # backend servers
+  auth:
+    image: auth
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    networks:
+    - frontend-net
+    - backend-net
+    ports:
+    - "8080:8080"
+
+  # image:
+  #   image: image
+  #   networks:
+  #   - frontend-net
+  #   - backend-net
+  #   ports:
+  #   - "8090:8090"
+  #
+  # recommend:
+  #   image: recommend
+  #   networks:
+  #   - backend-net
+  #   - frontend-net
+  #   ports:
+  #   - "8100:8100"
+
+  # frontend server
+
+# networks
+networks:
+  backend-net: {}
+  frontend-net: {}

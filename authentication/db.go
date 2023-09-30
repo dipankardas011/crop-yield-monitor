@@ -11,7 +11,7 @@ import (
 // FIXME: use the environment variables
 const (
 	DB_NAME      = "auth"
-	DB_CONN_ADDR = "127.0.0.1:3306"
+	DB_CONN_ADDR = "auth-db:3306"
 	dbPassword   = "12345"
 	DB_USER      = "auth"
 	TABLE_USERS  = "users"

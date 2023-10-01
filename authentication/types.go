@@ -10,13 +10,7 @@ type AccountSignUp struct {
 	Name     string `json:"name"`
 	UserName string `json:"username"`
 	Password string `json:"password"`
-	Email    string `json:"emailid"`
-}
-
-type AccountSignInRes struct {
-	Uuid string `json:"uuid"`
-	// AccessToken string    `json:"token"`
-	// ExpTime     time.Time `json:"expiration"`
+	Email    string `json:"email"`
 }
 
 type AccountSignIn struct {

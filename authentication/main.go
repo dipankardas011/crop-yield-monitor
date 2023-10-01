@@ -196,7 +196,7 @@ func Docs(w http.ResponseWriter, r *http.Request) (int, error) {
 			"[POST] signup":                    "/account/signup",
 			"[POST] logout":                    "/account/logout",
 			"[GET] token renew":                "/account/renew",
-			"[GET] authorization bearer token": "/account/token/status",
+			"[GET] authorization bearer token": "/account/token",
 			"[GET] Health status":              "/account/healthz",
 		},
 	}
@@ -213,7 +213,7 @@ func Health(w http.ResponseWriter, r *http.Request) (int, error) {
 	return writeJson(w, http.StatusOK, Response{Stdout: "auth looks healthy"})
 }
 
-func IsValidToken(w http.ResponseWriter, r *http.Request) (int, error) {
+func IsAuthenticToken(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
@@ -247,7 +247,7 @@ func IsValidToken(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusUnauthorized, err
 	}
 
-	return writeJson(w, http.StatusOK, Response{Stdout: "Welcome " + claims.Username})
+	return writeJson(w, http.StatusOK, Response{Stdout: claims.Username})
 }
 
 func main() {
@@ -258,7 +258,7 @@ func main() {
 	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp))
 	http.HandleFunc("/account/logout", makeHTTPHandler(Logout))
 	http.HandleFunc("/account/renew", makeHTTPHandler(Refresh))
-	http.HandleFunc("/account/token/status", makeHTTPHandler(IsValidToken))
+	http.HandleFunc("/account/token", makeHTTPHandler(IsAuthenticToken))
 
 	http.HandleFunc("/account", makeHTTPHandler(Docs))
 	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))

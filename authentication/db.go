@@ -8,14 +8,16 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-// FIXME: use the environment variables
 const (
-	DB_NAME      = "auth"
-	DB_CONN_ADDR = "auth-db:3306"
-	dbPassword   = "12345"
-	DB_USER      = "auth"
-	TABLE_USERS  = "users"
-	TABLE_PASS   = "passwords"
+	DB_NAME     string = "auth"
+	DB_USER     string = "auth"
+	TABLE_USERS string = "users"
+	TABLE_PASS  string = "passwords"
+)
+
+var (
+	DB_CONN_ADDR string = ""
+	dbPassword   string = ""
 )
 
 type DBClient struct {

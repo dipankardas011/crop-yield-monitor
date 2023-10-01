@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -137,7 +138,7 @@ func Refresh(w http.ResponseWriter, r *http.Request) (int, error) {
 	// In this case, a new token will only be issued if the old token is within
 	// 30 seconds of expiry. Otherwise, return a bad request status
 	if time.Until(claims.ExpiresAt.Time) > 30*time.Second {
-		return http.StatusNotAcceptable, apiError{Status: http.StatusNotAcceptable, Err: "a new token will only be issued if the old token is within 30 seconds of expiry"}
+		return http.StatusNotAcceptable, apiError{Status: http.StatusNotAcceptable, Err: "a new token will only be issued if the old token is within 30 seconds after expiry"}
 	}
 
 	// Now, create a new token for the current use, with a renewed expiration time
@@ -247,11 +248,17 @@ func IsAuthenticToken(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusUnauthorized, err
 	}
 
+	if time.Now().Unix() > claims.ExpiresAt.Unix() {
+		return http.StatusNotAcceptable, apiError{Status: http.StatusNotAcceptable, Err: "a new token will only be issued if the old token is within 30 seconds of expiry"}
+	}
+
 	return writeJson(w, http.StatusOK, Response{Stdout: claims.Username})
 }
 
 func main() {
 
+	DB_CONN_ADDR = os.Getenv("DB_URL")
+	dbPassword = os.Getenv("DB_PASSWORD")
 	jwtKey = []byte(generateRandomToken(20))
 
 	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn))

@@ -11,6 +11,12 @@ docker build --tag auth-db .
 make auth
 ```
 
+> create a folder in the project root `.env`
+```.env
+DB_URL=auth-db:3306
+DB_PASSWORD=12345
+```
+
 ## Finally make the docker compose up
 
 ```bash
@@ -68,7 +74,7 @@ curl -X POST 0.0.0.0:8080/account/signin -d '{"username":"crop123", "password":"
 how to use it for authentication
 
 ```bash
-curl -i -X GET 0.0.0.0:8080/account/token/status -H "Authorization: Bearer <JWT-Token>"
+curl -i -X GET 0.0.0.0:8080/account/token -H "Authorization: Bearer <JWT-Token>"
 
 HTTP/1.1 200 OK
 Accept: application/json; charset=utf-8

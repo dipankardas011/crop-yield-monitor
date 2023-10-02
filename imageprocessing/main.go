@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/rs/cors"
 )
 
 const (
@@ -62,7 +63,6 @@ func checkAuthenticUser(r *http.Request) (int, string, error) {
 	if err := json.Unmarshal(responseBody, &payload); err != nil {
 		return http.StatusInternalServerError, "", apiError{Status: http.StatusInternalServerError, Err: err.Error()}
 	}
-	fmt.Println(payload.String())
 
 	if response.StatusCode >= 300 {
 		return response.StatusCode, "", apiError{Status: response.StatusCode, Err: payload.Error}
@@ -87,8 +87,6 @@ func imageUpload(w http.ResponseWriter, r *http.Request) (int, error) {
 	if err != nil {
 		return status, err
 	}
-
-	log.Println(payload)
 
 	if payload.Format != "image/png" && payload.Format != "image/jpeg" {
 		return http.StatusUnsupportedMediaType, apiError{Status: http.StatusUnsupportedMediaType, Err: UnSupportedMediaFormatType.String()}
@@ -117,8 +115,6 @@ func imageGet(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusInternalServerError, err
 	}
 
-	fmt.Println(*img)
-
 	return writeJson(w, http.StatusOK, Response{
 		Stdout: "fake",
 		Image:  *img,
@@ -135,9 +131,9 @@ func Docs(w http.ResponseWriter, r *http.Request) (int, error) {
 		Loc map[string]string
 	}{
 		Loc: map[string]string{
-			"upload": "/image/upload",
-			"get":    "/image/get",
-			"TODO":   "about payloads",
+			"[POST] upload a new image":      "/image/upload",
+			"[GET] get the already uploaded": "/image/get",
+			"[GET] health of the server":     "/image/healthz",
 		},
 	}
 
@@ -164,11 +160,20 @@ func main() {
 	http.HandleFunc("/image", makeHTTPHandler(Docs))
 	http.HandleFunc("/image/healthz", makeHTTPHandler(Health))
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},                      // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders:   []string{"Authorization"},          // Allow Authorization header
+		AllowCredentials: true,
+		Debug:            true,
+	})
+
 	s := &http.Server{
 		Addr:           ":8090",
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+		Handler:        c.Handler(http.DefaultServeMux),
 	}
 
 	dbClient = &ImageDBClient{}

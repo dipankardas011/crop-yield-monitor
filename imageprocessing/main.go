@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -69,10 +68,6 @@ func checkAuthenticUser(r *http.Request) (int, string, error) {
 		return response.StatusCode, "", apiError{Status: response.StatusCode, Err: payload.Error}
 	}
 
-	if len(payload.Error) > 0 {
-		return response.StatusCode, "", apiError{Status: response.StatusCode, Err: payload.Error}
-	}
-
 	return http.StatusOK, payload.Stdout, nil
 }
 
@@ -82,7 +77,7 @@ func imageUpload(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusMethodNotAllowed, apiError{Status: http.StatusMethodNotAllowed, Err: "POST method is allowed"}
 	}
 
-	payload := ImageUpload{}
+	payload := Image{}
 
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: err.Error()}
@@ -94,17 +89,12 @@ func imageUpload(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 
 	log.Println(payload)
-	fileName := ""
-	switch payload.Format {
-	case "image/png":
-		fileName = username + ".png"
-	case "image/jpeg":
-		fileName = username + ".jpeg"
-	default:
+
+	if payload.Format != "image/png" && payload.Format != "image/jpeg" {
 		return http.StatusUnsupportedMediaType, apiError{Status: http.StatusUnsupportedMediaType, Err: UnSupportedMediaFormatType.String()}
 	}
 
-	if err := os.WriteFile(fileName, payload.RawImage, 0666); err != nil {
+	if err := dbClient.WriteImage(username, payload); err != nil {
 		return http.StatusInternalServerError, err
 	}
 
@@ -117,22 +107,21 @@ func imageGet(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusMethodNotAllowed, apiError{Status: http.StatusMethodNotAllowed, Err: "GET method is allowed"}
 	}
 
-	// get the username from the token from the auth server
-	// img := payload.Uuid // demo for image
-
-	status, _, err := checkAuthenticUser(r)
+	status, username, err := checkAuthenticUser(r)
 	if err != nil {
 		return status, err
 	}
 
-	img := "<DUMMY>"
-	fmt.Println(img)
+	img, err := dbClient.ReadImage(username)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	fmt.Println(*img)
 
 	return writeJson(w, http.StatusOK, Response{
 		Stdout: "fake",
-		Image: ImageGetResp{
-			RawImage: []byte(img),
-		},
+		Image:  *img,
 	})
 }
 

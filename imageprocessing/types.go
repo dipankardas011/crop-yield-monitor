@@ -2,19 +2,15 @@ package main
 
 import "fmt"
 
-type ImageUpload struct {
+type Image struct {
 	RawImage []byte `json:"raw_image_bytes"`
 	Format   string `json:"image_format"`
-}
-
-type ImageGetResp struct {
-	RawImage []byte `json:"raw_image_bytes"`
 }
 
 type Response struct {
 	Error  string `json:"errors"`
 	Stdout string `json:"stdout"`
-	Image  any
+	Image  Image
 }
 
 type AuthResponse struct {

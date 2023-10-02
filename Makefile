@@ -2,6 +2,14 @@ recommend:
 	@echo "building recommendation"
 	cd recommendation && docker build -t recommend .
 
+image-db:
+	@echo "building image-db"
+	cd db/image && docker build -t image-db .
+
+auth-db:
+	@echo "building auth-db"
+	cd db/auth && docker build -t auth-db .
+
 image:
 	@echo "building image"
 	cd imageprocessing && docker build -t image .
@@ -10,7 +18,7 @@ auth:
 	@echo "building auth"
 	cd authentication && docker build -t auth .
 
-build: recommend image auth
+build: recommend image auth auth-db image-db
 	@echo "Building done"
 
 recommend_run:
@@ -25,7 +33,12 @@ auth_run:
 	@echo "running auth"
 	docker run -dp 8080:8080 --name auth auth
 
-run: recommend_run image_run auth_run
+run: 
+	docker compose up --detach
+	@echo "Running done"
+
+run-watch: 
+	docker compose up
 	@echo "Running done"
 
 destroy:

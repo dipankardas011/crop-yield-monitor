@@ -14,6 +14,10 @@ const (
 	AUTH_SVR_URL = "http://auth:8080/account/token"
 )
 
+var (
+	dbClient *ImageDBClient
+)
+
 type ErrorMsg string
 
 func (e ErrorMsg) String() string {
@@ -176,6 +180,11 @@ func main() {
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+	}
+
+	dbClient = &ImageDBClient{}
+	if err := dbClient.NewClient(); err != nil {
+		panic(err)
 	}
 
 	log.Printf("Started to serve the image server on port {%v}\n", s.Addr)

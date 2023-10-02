@@ -8,6 +8,14 @@ services:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+  image-db:
+    image: image-db
+    networks:
+    - backend-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "--user", "health", "--pass", "77777", "PING"]
+      timeout: 20s
+      retries: 10
 
   # backend servers
   auth:
@@ -26,12 +34,14 @@ services:
   image:
     image: image
     depends_on:
-      - auth
+      image-db:
+        condition: service_healthy
     networks:
     - frontend-net
     - backend-net
     ports:
     - "8090:8090"
+
   #
   # recommend:
   #   image: recommend

@@ -90,13 +90,12 @@ Content-Length: 55
 
 # Instructions to test out Image server
 
-<!-- ## Build mysql server -->
-<!-- ```bash -->
-<!-- cd db/auth -->
-<!-- docker build --tag auth-db . -->
-<!-- ``` -->
+## Build all resources
+```bash
+make build
+```
 
-## Build the Auth server 
+## Build the image server 
 ```bash
 make image
 ```
@@ -111,7 +110,7 @@ make image
 
 ```bash
 # for starting
-docker compose up
+make run-watch
 
 # for stopping
 docker compose down

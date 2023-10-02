@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/rs/cors"
 )
 
 type ErrorMsg string
@@ -76,11 +78,20 @@ func main() {
 	http.HandleFunc("/recommend", makeHTTPHandler(Docs))
 	http.HandleFunc("/recommend/healthz", makeHTTPHandler(Health))
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},              // Allow all origins
+		AllowedMethods: []string{"GET", "OPTIONS"}, // Allow GET, OPTIONS methods
+		AllowedHeaders: []string{"Authorization"},  // Allow Authorization header
+		// AllowCredentials: true,
+		Debug: true,
+	})
+
 	s := &http.Server{
 		Addr:           ":8100",
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+		Handler:        c.Handler(http.DefaultServeMux),
 	}
 
 	log.Printf("Started to serve the recommend server on port {%v}\n", s.Addr)

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/rs/cors"
 )
 
 type ErrorMsg string
@@ -270,11 +271,20 @@ func main() {
 	http.HandleFunc("/account", makeHTTPHandler(Docs))
 	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},                      // Allow all origins
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders: []string{"Authorization"},          // Allow Authorization header
+		// AllowCredentials: true,
+		Debug: true,
+	})
+
 	s := &http.Server{
 		Addr:           ":8080",
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+		Handler:        c.Handler(http.DefaultServeMux),
 	}
 
 	// create the mysql server client

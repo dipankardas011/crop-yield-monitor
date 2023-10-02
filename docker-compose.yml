@@ -23,13 +23,15 @@ services:
     ports:
     - "8080:8080"
 
-  # image:
-  #   image: image
-  #   networks:
-  #   - frontend-net
-  #   - backend-net
-  #   ports:
-  #   - "8090:8090"
+  image:
+    image: image
+    depends_on:
+      - auth
+    networks:
+    - frontend-net
+    - backend-net
+    ports:
+    - "8090:8090"
   #
   # recommend:
   #   image: recommend

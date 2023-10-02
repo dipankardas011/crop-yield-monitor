@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/rs/cors"
@@ -155,17 +156,20 @@ func Health(w http.ResponseWriter, r *http.Request) (int, error) {
 
 func main() {
 
+	IMG_SVR_URL = os.Getenv("DB_URL")
+	PASS = os.Getenv("DB_PASSWORD")
+
 	http.HandleFunc("/image/upload", makeHTTPHandler(imageUpload))
 	http.HandleFunc("/image/get", makeHTTPHandler(imageGet))
 	http.HandleFunc("/image", makeHTTPHandler(Docs))
 	http.HandleFunc("/image/healthz", makeHTTPHandler(Health))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},                      // Allow all origins
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
-		AllowedHeaders:   []string{"Authorization"},          // Allow Authorization header
-		AllowCredentials: true,
-		Debug:            true,
+		AllowedOrigins: []string{"*"},                      // Allow all origins
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders: []string{"Authorization"},          // Allow Authorization header
+		// AllowCredentials: true,
+		Debug: true,
 	})
 
 	s := &http.Server{

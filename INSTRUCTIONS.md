@@ -11,7 +11,7 @@ docker build --tag auth-db .
 make auth
 ```
 
-> create a folder in the project root `.env`
+> create a folder in the project root `.env-auth`
 ```.env
 DB_URL=auth-db:3306
 DB_PASSWORD=12345
@@ -100,11 +100,11 @@ make build
 make image
 ```
 
-<!-- > create a folder in the project root `.env` -->
-<!-- ```.env -->
-<!-- DB_URL=auth-db:3306 -->
-<!-- DB_PASSWORD=12345 -->
-<!-- ``` -->
+> create a folder in the project root `.env-image`
+```.env
+DB_URL=image-db:6379
+DB_PASSWORD=12345
+```
 
 ## Finally make the docker compose up
 

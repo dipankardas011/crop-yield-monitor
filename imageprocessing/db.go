@@ -10,9 +10,12 @@ import (
 )
 
 const (
+	USER = "image"
+)
+
+var (
 	IMG_SVR_URL = "image-db:6379"
 	PASS        = "12345"
-	USER        = "image"
 )
 
 type ImageDBClient struct {

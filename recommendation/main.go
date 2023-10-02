@@ -79,11 +79,11 @@ func main() {
 	http.HandleFunc("/recommend/healthz", makeHTTPHandler(Health))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},              // Allow all origins
-		AllowedMethods:   []string{"GET", "OPTIONS"}, // Allow GET, OPTIONS methods
-		AllowedHeaders:   []string{"Authorization"},  // Allow Authorization header
-		AllowCredentials: true,
-		Debug:            true,
+		AllowedOrigins: []string{"*"},              // Allow all origins
+		AllowedMethods: []string{"GET", "OPTIONS"}, // Allow GET, OPTIONS methods
+		AllowedHeaders: []string{"Authorization"},  // Allow Authorization header
+		// AllowCredentials: true,
+		Debug: true,
 	})
 
 	s := &http.Server{

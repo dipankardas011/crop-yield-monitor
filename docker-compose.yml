@@ -24,7 +24,7 @@ services:
       auth-db:
         condition: service_healthy
     env_file:
-      - .env
+      - .env-auth
     networks:
     - frontend-net
     - backend-net
@@ -36,20 +36,24 @@ services:
     depends_on:
       image-db:
         condition: service_healthy
+    env_file:
+      - .env-image
     networks:
     - frontend-net
     - backend-net
     ports:
     - "8090:8090"
 
-  #
-  # recommend:
-  #   image: recommend
-  #   networks:
-  #   - backend-net
-  #   - frontend-net
-  #   ports:
-  #   - "8100:8100"
+  recommend:
+    image: recommend
+    depends_on:
+    - image
+    - auth
+    networks:
+    - backend-net
+    - frontend-net
+    ports:
+    - "8100:8100"
 
   # frontend server
 

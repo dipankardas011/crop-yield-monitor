@@ -3,31 +3,32 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
+	"sync"
 
 	"github.com/redis/go-redis/v9"
 )
 
 const (
-	USER = "image"
+	USER = "recommend"
 )
 
 var (
-	IMG_SVR_URL = ""
-	PASS        = ""
+	RECOMMEND_SVR_URL = ""
+	PASS              = ""
 )
 
-type ImageDBClient struct {
+type RecommendDBClient struct {
 	client *redis.Client
 	ctx    context.Context
+	mx     sync.RWMutex
 }
 
 var ctx = context.Background()
 
-func (this *ImageDBClient) NewClient() error {
+func (this *RecommendDBClient) NewClient() error {
 	this.client = redis.NewClient(&redis.Options{
-		Addr:     IMG_SVR_URL,
+		Addr:     RECOMMEND_SVR_URL,
 		Password: PASS,
 		Username: USER,
 	})
@@ -39,12 +40,15 @@ func (this *ImageDBClient) NewClient() error {
 
 	log.Println(pong, err)
 
-	log.Println("Connected with image db!")
+	log.Println("Connected with recommend db!")
 	return nil
 }
 
-func (this *ImageDBClient) WriteImage(username string, img Image) error {
-	rawImg, err := json.Marshal(img)
+func (this *RecommendDBClient) WriteRecommendations(username string, rec Recommendations) error {
+	this.mx.Lock()
+	defer this.mx.Unlock()
+
+	rawImg, err := json.Marshal(rec)
 	if err != nil {
 		return err
 	}
@@ -58,17 +62,19 @@ func (this *ImageDBClient) WriteImage(username string, img Image) error {
 	return nil
 }
 
-func (this *ImageDBClient) ReadImage(username string) (*Image, error) {
+func (this *RecommendDBClient) ReadRecommendations(username string) (*Recommendations, error) {
+	this.mx.RLock()
+	defer this.mx.RUnlock()
 
 	rawImg, err := this.client.Get(this.ctx, username).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, fmt.Errorf("Key not found in Redis")
+			return nil, err
 		}
 		return nil, err
 	}
 
-	var data *Image
+	var data *Recommendations
 	if err := json.Unmarshal([]byte(rawImg), &data); err != nil {
 		return nil, err
 	}

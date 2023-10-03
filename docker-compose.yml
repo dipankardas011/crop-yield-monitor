@@ -69,6 +69,8 @@ services:
       image-db:
         condition: service_healthy
 
+    env_file:
+      - .env-recommend
     networks:
     - backend-net
     - frontend-net

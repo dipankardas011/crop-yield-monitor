@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -214,6 +215,9 @@ func DatabaseAccessRead(w http.ResponseWriter, r *http.Request) (int, error) {
 }
 
 func main() {
+
+	RECOMMEND_SVR_URL = os.Getenv("DB_URL")
+	PASS = os.Getenv("DB_PASSWORD")
 
 	http.HandleFunc("/recommend/get", makeHTTPHandler(GetRecommendations))
 	http.HandleFunc("/recommend", makeHTTPHandler(Docs))

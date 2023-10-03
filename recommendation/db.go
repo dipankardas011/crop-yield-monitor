@@ -14,8 +14,8 @@ const (
 )
 
 var (
-	RECOMMEND_SVR_URL = "recommend-db:6379"
-	PASS              = "12345"
+	RECOMMEND_SVR_URL = ""
+	PASS              = ""
 )
 
 type RecommendDBClient struct {

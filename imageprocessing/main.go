@@ -97,7 +97,7 @@ func imageUpload(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusInternalServerError, err
 	}
 
-	return writeJson(w, http.StatusOK, Response{Stdout: "fake response uploaded"})
+	return writeJson(w, http.StatusOK, Response{Stdout: "image uploaded for username " + username})
 }
 
 func imageGet(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -117,7 +117,7 @@ func imageGet(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 
 	return writeJson(w, http.StatusOK, Response{
-		Stdout: "fake",
+		Stdout: "uploaded image of username" + username,
 		Image:  *img,
 	})
 }

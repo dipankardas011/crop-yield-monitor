@@ -8,6 +8,7 @@ services:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+
   image-db:
     image: image-db
     networks:
@@ -17,12 +18,23 @@ services:
       timeout: 20s
       retries: 10
 
+  recommend-db:
+    image: recommend-db
+    networks:
+    - backend-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "--user", "health", "--pass", "77777", "PING"]
+      timeout: 20s
+      retries: 10
+
+
   # backend servers
   auth:
     image: auth
     depends_on:
       auth-db:
         condition: service_healthy
+
     env_file:
       - .env-auth
     networks:
@@ -36,6 +48,9 @@ services:
     depends_on:
       image-db:
         condition: service_healthy
+      auth-db:
+        condition: service_healthy
+
     env_file:
       - .env-image
     networks:
@@ -47,15 +62,23 @@ services:
   recommend:
     image: recommend
     depends_on:
-    - image
-    - auth
+      recommend-db:
+        condition: service_healthy
+      auth-db:
+        condition: service_healthy
+      image-db:
+        condition: service_healthy
+
     networks:
     - backend-net
     - frontend-net
     ports:
     - "8100:8100"
 
+  # another one for the ml workload
+
   # frontend server
+  # one for the front end
 
 # networks
 networks:

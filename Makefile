@@ -20,8 +20,13 @@ auth-db:
 	@echo "building auth-db"
 	cd db/auth && docker build -t auth-db .
 
+recommend-db:
+	@echo "building recommend-db"
+	cd db/recommend && docker build -t recommend-db .
+
+
 ####### Build all containers
-build: recommend image auth auth-db image-db
+build: recommend image auth auth-db image-db recommend-db
 	@echo "Building done"
 
 ####### Run the backend containers(each)

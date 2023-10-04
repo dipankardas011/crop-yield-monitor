@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -21,6 +22,7 @@ var (
 type ImageDBClient struct {
 	client *redis.Client
 	ctx    context.Context
+	mx     sync.RWMutex
 }
 
 var ctx = context.Background()
@@ -44,6 +46,9 @@ func (this *ImageDBClient) NewClient() error {
 }
 
 func (this *ImageDBClient) WriteImage(username string, img Image) error {
+	this.mx.Lock()
+	defer this.mx.Unlock()
+
 	rawImg, err := json.Marshal(img)
 	if err != nil {
 		return err
@@ -59,6 +64,8 @@ func (this *ImageDBClient) WriteImage(username string, img Image) error {
 }
 
 func (this *ImageDBClient) ReadImage(username string) (*Image, error) {
+	this.mx.RLock()
+	defer this.mx.RUnlock()
 
 	rawImg, err := this.client.Get(this.ctx, username).Result()
 	if err != nil {

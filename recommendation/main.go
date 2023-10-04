@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -18,8 +18,9 @@ var (
 )
 
 const (
-	AUTH_SVR_URL                 = "http://auth:8080/account/token"
-	ML_SVR_URL                   = "http://ml:9090/start"
+	AUTH_SVR_URL        string   = "http://auth:8080/account/token"
+	IMG_SVR_URL         string   = "http://image:8090/image/get"
+	ML_SVR_URL          string   = "http://ml:9090/start"
 	BadJsonFormat       ErrorMsg = "[Err] wrong json format"
 	InternalServerError ErrorMsg = "[Err] internal server error"
 )
@@ -33,42 +34,25 @@ func (e ErrorMsg) String() string {
 func checkAuthenticUser(r *http.Request) (int, string, error) {
 	// it should pass the token extracted from parent functions which call this
 
-	// Get the JWT token from the Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return http.StatusUnauthorized, "", apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
-	}
-
-	request, error := http.NewRequest(http.MethodGet, AUTH_SVR_URL, nil)
-	if error != nil {
-		return http.StatusInternalServerError, "", error
-	}
-
-	request.Header.Set("Authorization", r.Header.Get("Authorization"))
-
-	client := &http.Client{}
-
-	response, error := client.Do(request)
-	if error != nil {
-		return http.StatusInternalServerError, "", error
-	}
-
-	responseBody, error := io.ReadAll(response.Body)
-	if error != nil {
-		return http.StatusInternalServerError, "", error
-	}
-
 	payload := AuthResponse{}
-
-	if err := json.Unmarshal(responseBody, &payload); err != nil {
-		return http.StatusInternalServerError, "", apiError{Status: http.StatusInternalServerError, Err: err.Error()}
-	}
-
-	if response.StatusCode >= 300 {
-		return response.StatusCode, "", apiError{Status: response.StatusCode, Err: payload.Error}
+	stat, err := makeHTTPCall(r, http.MethodGet, AUTH_SVR_URL, nil, &payload)
+	if err != nil {
+		return stat, "", err
 	}
 
 	return http.StatusOK, payload.Stdout, nil
+}
+
+func getImage(r *http.Request) (int, *Image, error) {
+
+	payload := ImgResponse{}
+
+	stat, err := makeHTTPCall(r, http.MethodGet, AUTH_SVR_URL, nil, &payload)
+	if err != nil {
+		return stat, nil, err
+	}
+
+	return http.StatusOK, &payload.Image, nil
 }
 
 func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -113,12 +97,25 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 		// WARN: making assumption its PUT request
 		// TODO: the ML will recieve the Auth Token and the username
 
-		// Create a new PUT request
-		req, err := http.NewRequest("PUT", ML_SVR_URL+"?username="+username, nil)
+		// get the image
+		stat, rawImg, err := getImage(r)
+		if err != nil {
+			return stat, err
+		}
+
+		rawImgPayload, err := json.Marshal(rawImg)
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
 
+		// Create a new PUT request
+		req, err := http.NewRequest("PUT", ML_SVR_URL+"?username="+username, bytes.NewBuffer(rawImgPayload))
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+
+		// Set content type to application/json
+		req.Header.Set("Content-Type", "application/json")
 		// sharing the authorization link
 		req.Header.Set("Authorization", r.Header.Get("Authorization"))
 
@@ -214,6 +211,7 @@ func DatabaseAccessRead(w http.ResponseWriter, r *http.Request) (int, error) {
 	return writeJson(w, http.StatusOK, recommend)
 }
 
+// NOTE: THIS SERVER HAS NOT BEEN TESTED!!!
 func main() {
 
 	RECOMMEND_SVR_URL = os.Getenv("DB_URL")

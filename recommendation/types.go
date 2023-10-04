@@ -27,6 +27,18 @@ type AuthResponse struct {
 	Account any
 }
 
+// /// NOTE: image server type
+type Image struct {
+	RawImage []byte `json:"raw_image_bytes"`
+	Format   string `json:"image_format"`
+}
+
+type ImgResponse struct {
+	Error  string `json:"errors"`
+	Stdout string `json:"stdout"`
+	Image  Image
+}
+
 func (r AuthResponse) String() string {
 	return fmt.Sprintf("{ Err: %s, Stdout: %s, Account: %v }", r.Error, r.Stdout, r.Account)
 }

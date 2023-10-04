@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -31,4 +33,51 @@ func makeHTTPHandler(f apiFunc) http.HandlerFunc {
 
 		log.Printf("[%s] %s {%d} %v", r.Method, r.URL.Path, statCode, time.Since(start))
 	}
+}
+
+func makeHTTPCall(r *http.Request, httpMethod, url string, body io.Reader, res any) (int, error) {
+	// it should pass the token extracted from parent functions which call this
+	// Get the JWT token from the Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
+	}
+
+	request, error := http.NewRequest(httpMethod, url, body)
+	if error != nil {
+		return http.StatusInternalServerError, error
+	}
+
+	request.Header.Set("Authorization", r.Header.Get("Authorization"))
+
+	client := &http.Client{}
+
+	response, error := client.Do(request)
+	if error != nil {
+		return http.StatusInternalServerError, error
+	}
+
+	responseBody, error := io.ReadAll(response.Body)
+	if error != nil {
+		return http.StatusInternalServerError, error
+	}
+
+	if err := json.Unmarshal(responseBody, &res); err != nil {
+		return http.StatusInternalServerError, apiError{Status: http.StatusInternalServerError, Err: err.Error()}
+	}
+
+	if response.StatusCode >= 300 {
+		err := ""
+		switch o := res.(type) {
+		case *Response:
+			err = o.Error
+		case *AuthResponse:
+			err = o.Error
+		case *ImgResponse:
+			err = o.Error
+		}
+		return response.StatusCode, apiError{Status: response.StatusCode, Err: err}
+	}
+
+	return http.StatusOK, nil
 }

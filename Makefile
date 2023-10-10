@@ -11,6 +11,11 @@ auth:
 	@echo "building auth"
 	cd authentication && docker build -t auth .
 
+
+lb:
+	@echo "building lb-backend"
+	cd lb-backend && docker build -t lb-backend .
+
 ####### Database
 image-db:
 	@echo "building image-db"
@@ -24,12 +29,11 @@ recommend-db:
 	@echo "building recommend-db"
 	cd db/recommend && docker build -t recommend-db .
 
-
 ####### Build all containers
-build: recommend image auth auth-db image-db recommend-db
+build: recommend image auth lb auth-db image-db recommend-db
 	@echo "Building done"
-
-####### Run the backend containers(each)
+#
+# ####### Run the backend containers(each)
 recommend_run:
 	@echo "running recommend"
 	docker run -dp 8100:8100 --name recommend recommend

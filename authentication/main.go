@@ -268,7 +268,7 @@ func main() {
 	http.HandleFunc("/account/renew", makeHTTPHandler(Refresh))
 	http.HandleFunc("/account/token", makeHTTPHandler(IsAuthenticToken))
 
-	http.HandleFunc("/account", makeHTTPHandler(Docs))
+	http.HandleFunc("/account/docs", makeHTTPHandler(Docs))
 	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))
 
 	c := cors.New(cors.Options{

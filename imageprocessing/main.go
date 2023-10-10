@@ -161,7 +161,7 @@ func main() {
 
 	http.HandleFunc("/image/upload", makeHTTPHandler(imageUpload))
 	http.HandleFunc("/image/get", makeHTTPHandler(imageGet))
-	http.HandleFunc("/image", makeHTTPHandler(Docs))
+	http.HandleFunc("/image/docs", makeHTTPHandler(Docs))
 	http.HandleFunc("/image/healthz", makeHTTPHandler(Health))
 
 	c := cors.New(cors.Options{

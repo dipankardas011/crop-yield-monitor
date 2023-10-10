@@ -218,7 +218,7 @@ func main() {
 	PASS = os.Getenv("DB_PASSWORD")
 
 	http.HandleFunc("/recommend/get", makeHTTPHandler(GetRecommendations))
-	http.HandleFunc("/recommend", makeHTTPHandler(Docs))
+	http.HandleFunc("/recommend/docs", makeHTTPHandler(Docs))
 	http.HandleFunc("/recommend/healthz", makeHTTPHandler(Health))
 	http.HandleFunc("/recommend/db/read", makeHTTPHandler(DatabaseAccessRead))
 	http.HandleFunc("/recommend/db/write", makeHTTPHandler(DatabaseAccessWrite))

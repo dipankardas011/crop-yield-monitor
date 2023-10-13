@@ -1,0 +1,561 @@
+openapi: 3.0.3
+info:
+  title: Crop Yield Monitor OpenAPI 3.0
+  description: |-
+    This is a simple project to build crop yeild monitor and the backend api
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: dipankardas0115@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://0.0.0.0:8080
+
+tags:
+  - name: account
+    description: used for authenticating users and getting token
+    externalDocs:
+      description: Find out more
+      url: http://0.0.0.0:8080/account/docs
+
+  - name: image
+    description: Get and store the image of the soil
+    externalDocs:
+      description: Find out more
+      url: http://0.0.0.0:8080/image/docs
+
+  - name: recommend
+    description: Helps in getting the recommendations
+    externalDocs:
+      description: Find out more
+      url: http://0.0.0.0:8080/recommend/docs
+
+paths:
+  /account/signin:
+    post:
+      tags:
+        - account
+      summary: signin as a user
+      description: account login
+      operationId: accountSignIn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignIn'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '404':
+          description: Pet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '405':
+          description: Validation exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /account/signup:
+    post:
+      tags:
+        - account
+      summary: signup as a user
+      description: account signup
+      operationId: accountSignUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUp'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+        '400':
+          description: Invalid status value
+
+  /account/token:
+    get:
+      tags:
+        - account
+      summary: token validation
+      description: whether the token is valid for a user?
+      operationId: accountToken
+
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+        '400':
+          description: Invalid tag value
+      security:
+        - bearerAuth: []
+
+  /account/logout:
+    post:
+      tags:
+        - account
+      summary: logout
+      description: user logout
+      operationId: accountLogOut
+
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+        '400':
+          description: Invalid tag value
+      security:
+        - bearerAuth: []
+
+  /account/renew:
+    post:
+      tags:
+        - account
+      summary: token renew
+      description: token renew of that user
+      operationId: accountRenew
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+
+
+  /image/upload:
+    post:
+      tags:
+        - image
+      summary: image upload
+      description: user uploads image of soil
+      operationId: imageUpload
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Image'
+        required: true
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+        '405':
+          description: Invalid input
+
+  /image/get:
+    get:
+      tags:
+        - image
+      summary: image get
+      description: client receives the image of soil
+      operationId: imageGet
+
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+
+
+
+  /recommend/get:
+    get:
+      tags:
+        - user
+      summary: recommendation generate
+      description: user requests for the recommendations
+      operationId: recommendGet
+
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendResponse'
+
+
+  /recommend/db/read:
+    get:
+      tags:
+        - user
+      summary: mostly used by the backend for getting recommendation files
+      description: recommendation for particular user
+      operationId: recommendDBRead
+
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recommendations'
+
+        '401':
+          description: token expired or account is invalid
+        default:
+          description: successful operation
+
+  /recommend/db/write:
+    get:
+      tags:
+        - user
+      summary: mostly used by the backend for uploading the recommendation data
+      description: recommendation for particular user write
+      operationId: recommendDBWrite
+
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Bearer token for authentication
+          required: true  # This indicates that the Authorization header is required
+          schema:
+            type: string  # Specify the data type of the header value
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendResponse'
+        '400':
+          description: Invalid username/password supplied
+
+
+  /recommend/healthz:
+    get:
+      tags:
+        - recommend
+      summary: uploads an image
+      description: ''
+      operationId: recommendHealth
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendResponse'
+
+
+  /recommend/docs:
+    get:
+      tags:
+        - recommend
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: recommendDocs
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendResponse'
+
+
+  /image/healthz:
+    get:
+      tags:
+        - image
+      summary: uploads an image
+      description: ''
+      operationId: imageHealth
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+
+  /image/docs:
+    get:
+      tags:
+        - image
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: imageDocs
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+
+
+  /account/healthz:
+    get:
+      tags:
+        - account
+      summary: uploads an image
+      description: ''
+      operationId: accountHealth
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /account/docs:
+    get:
+      tags:
+        - account
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: accountDocs
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+
+components:
+  schemas:
+    SignUp:
+      type: object
+      properties:
+        username:
+          type: string
+          example: dipankar
+        name:
+          type: string
+          example: Dipankar Das
+        email:
+          type: string
+          example: 20051554@kiit.ac.in
+        password:
+          type: string
+          example: '12345'
+      xml:
+        name: signup
+    SignIn:
+      type: object
+      properties:
+        username:
+          type: string
+          example: dipankar
+        password:
+          type: string
+          example: '12345'
+      xml:
+        name: signin
+
+    AccountResponse:
+      type: object
+      properties:
+        stdout:
+          type: string
+          example: "demo stdout"
+        error:
+          type: string
+        account:
+          type: object
+      xml:
+        name: authResponse
+
+    Image:
+      type: object
+      properties:
+        raw_image_bytes:
+          type: string  # Representing []byte as string
+          format: binary  # Indicates binary data
+        image_format:
+          type: string
+          enum:
+            - image/png
+            - image/jpeg
+      xml:
+        name: image
+
+    ImageResponse:
+      type: object
+      properties:
+        errors:
+          type: string
+        stdout:
+          type: string
+        image:
+          $ref: '#/components/schemas/Image'
+      xml:
+        name: imageResponse
+
+    RecommendationStatus:
+      type: string
+      enum:
+        - Ready
+        - NotReady
+        - Scheduled
+
+    Recommendations:
+      type: object
+      properties:
+        crops:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/RecommendationStatus'
+
+    RecommendResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message, if any
+        stdout:
+          type: string
+          description: Standard output message
+        recommendations:
+          $ref: '#/components/schemas/Recommendations'
+
+  requestBodies:
+    AccountResponse:
+      description: Account response body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountResponse'
+
+    ImageResponse:
+      description: Image response body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ImageResponse'
+
+    RecommendResponse:
+      description: Recommend response body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RecommendResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -252,7 +252,7 @@ paths:
   /recommend/get:
     get:
       tags:
-        - user
+        - recommend
       summary: recommendation generate
       description: user requests for the recommendations
       operationId: recommendGet
@@ -279,7 +279,7 @@ paths:
   /recommend/db/read:
     get:
       tags:
-        - user
+        - recommend
       summary: mostly used by the backend for getting recommendation files
       description: recommendation for particular user
       operationId: recommendDBRead
@@ -310,7 +310,7 @@ paths:
   /recommend/db/write:
     get:
       tags:
-        - user
+        - recommend
       summary: mostly used by the backend for uploading the recommendation data
       description: recommendation for particular user write
       operationId: recommendDBWrite

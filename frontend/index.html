@@ -40,7 +40,7 @@
 
 				document.getElementById('outputBytes').value = JSON.stringify(byteValues);
 
-				fetch('http://0.0.0.0:8090/image/upload', {
+				fetch('http://0.0.0.0:8080/image/upload', {
 					method: 'POST',
 					headers: {
 						'Authorization': 'Bearer ' + token,

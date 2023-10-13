@@ -79,7 +79,7 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 	if err != nil {
 		if err == redis.Nil {
 			// need to write to the db
-			recommend := Recommendations{Status: RecommendationPending}
+			recommend := Recommendations{Status: RecommendationNotReady}
 
 			if err := dbClient.WriteRecommendations(username, recommend); err != nil {
 				return http.StatusInternalServerError, err
@@ -90,7 +90,7 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 
 	// NOTE: redundant check for readability
-	if recommend.Status == RecommendationPending && recommend.Status != RecommendationScheduled {
+	if recommend.Status == RecommendationNotReady && recommend.Status != RecommendationScheduled {
 		// call the ML will be avoided (DUPLICATION of trigger can happen) for that Flag is there
 		// WARN: Responsibility of the ML developer to handle these
 		// NOTE: Need to decide whether the ML part will require another auth call or we simply pass the username as json body for it to handle rest

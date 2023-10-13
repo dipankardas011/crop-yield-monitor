@@ -6,7 +6,7 @@ type RecommendationStatus string
 
 const (
 	RecommendationReady     RecommendationStatus = "Ready"     // now we can use the results
-	RecommendationPending   RecommendationStatus = "NotReady"  // we have triggered the ML to start it
+	RecommendationNotReady  RecommendationStatus = "NotReady"  // we have triggered the ML to start it
 	RecommendationScheduled RecommendationStatus = "Scheduled" // it helps the ML and the recommend server to know whether the Record corresponsding to the user is being processed or it is the first time triggering
 )
 

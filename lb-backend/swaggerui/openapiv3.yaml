@@ -106,14 +106,10 @@ paths:
       summary: token validation
       description: whether the token is valid for a user?
       operationId: accountToken
+      
+      security:
+        - bearerAuth: []
 
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
       responses:
         '200':
           description: successful operation
@@ -124,8 +120,6 @@ paths:
 
         '400':
           description: Invalid tag value
-      security:
-        - bearerAuth: []
 
   /account/logout:
     post:
@@ -135,13 +129,6 @@ paths:
       description: user logout
       operationId: accountLogOut
 
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
       responses:
         '200':
           description: successful operation
@@ -162,13 +149,6 @@ paths:
       summary: token renew
       description: token renew of that user
       operationId: accountRenew
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
       security:
         - bearerAuth: []
       responses:
@@ -193,13 +173,6 @@ paths:
       operationId: imageUpload
       security:
         - bearerAuth: [ ]
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
       requestBody:
         content:
           application/json:
@@ -227,13 +200,6 @@ paths:
 
       security:
         - bearerAuth: [ ]
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
 
       responses:
         '200':
@@ -259,13 +225,6 @@ paths:
 
       security:
         - bearerAuth: [ ]
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
 
       responses:
         default:
@@ -286,13 +245,6 @@ paths:
 
       security:
         - bearerAuth: [ ]
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
 
       responses:
         '200':
@@ -317,13 +269,6 @@ paths:
 
       security:
         - bearerAuth: [ ]
-      parameters:
-        - name: Authorization
-          in: header
-          description: Bearer token for authentication
-          required: true  # This indicates that the Authorization header is required
-          schema:
-            type: string  # Specify the data type of the header value
 
       responses:
         '200':

@@ -1,58 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Image to Bytes</title>
-	</head>
+    <head>
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <title>Website</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
 
-	<body>
-		<h2>Upload Image</h2>
-		<caption>Image: </caption>
-		<input type="file" id="fileInput" accept="image/*">
-		<br>
-		<caption>JWT Token: </caption>
-		<input type="text" id="jwt-token">
-		<h3>Bytes Output:</h3>
-		<textarea id="outputBytes" rows="10" cols="80" readonly></textarea>
+<body>
+    
+    <header>
+        <h2 class="logo">Plant Health</h2>
+        <nav class="navigation">
+            <a href="#home" class="active">Home</a>
+            <a href="#about">About Us</a>
+            <a href="#services">Services</a>
+            <button class="btnLogin-popup">Login</button>
+        </nav>
+    </header>
 
-		<script>
-		document.getElementById('fileInput').addEventListener('change', function (event) {
-			const file = event.target.files[0];
-			let format = file.type;
-			if (file.type === "image/png" || file.type === "image/jpeg") {
-				console.log("Image format");
-			} else {
-				console.log("Image format: Unknown");
-				alert("Invalid file");
-				exit(1);
-			}
+    <div class="wrapper">
+        <span class="icon-close">
+            <ion-icon name="close-outline"></ion-icon>
+        </span>
+        <div class="form-box login">
+            <h2>Login</h2>
+            <form action="#">
+                <div class="input-box">
+                    <span class="icon">
+                        <ion-icon name="mail-outline"></ion-icon>
+                    </span>
+                    <input type="email" required>
+                    <label>Email</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                    </span>
+                    <input type="password" required>
+                    <label>Password</label>
+                </div>
+                <div class="remember-forgot">
+                    <label><input type="checkbox">Remember me</label>
+                    <a href="#">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <div class="login-register">
+                    <p>Don't have an account? <a href="#" class="register-link">Register</a></p>
+                </div>
+            </form>
+        </div>
 
-			const token = document.getElementById('jwt-token').value;
-
-			const reader = new FileReader();
-
-			reader.onloadend = function () {
-				const arrayBuffer = reader.result;
-				const byteArray = new Uint8Array(arrayBuffer);
-				const byteValues = Array.from(byteArray);
-
-				document.getElementById('outputBytes').value = JSON.stringify(byteValues);
-
-				fetch('http://0.0.0.0:8080/image/upload', {
-					method: 'POST',
-					headers: {
-						'Authorization': 'Bearer ' + token,
-					},
-					body: JSON.stringify({ raw_image_bytes: byteValues, image_format: String(format) })
-				}).then(response => response.json())
-					.then(data => console.log(data));
-			};
-
-			reader.readAsArrayBuffer(file);
-		});
-		</script>
-	</body>
+        <div class="form-box Register">
+            <h2>Registration</h2>
+            <form action="#">
+                <div class="input-box">
+                    <span class="icon">
+                        <ion-icon name="person-outline"></ion-icon>
+                    </span>
+                    <input type="text" required>
+                    <label>Username</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon">
+                        <ion-icon name="mail-outline"></ion-icon>
+                    </span>
+                    <input type="email" required>
+                    <label>Email</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                    </span>
+                    <input type="password" required>
+                    <label>Password</label>
+                </div>
+                <div class="remember-forgot">
+                    <label><input type="checkbox">Agree to the terms & conditions</label>
+                </div>
+                <button type="submit" class="btn">Register</button>
+                <div class="login-register">
+                    <p>Already have an account? <a href="#" class="login-link">Login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script> 
+</body>
 
 </html>

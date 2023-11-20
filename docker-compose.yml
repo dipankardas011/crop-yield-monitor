@@ -3,7 +3,7 @@ services:
   auth-db:
     image: auth-db
     networks:
-    - backend-net
+    - crop-yield
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
@@ -12,7 +12,7 @@ services:
   image-db:
     image: image-db
     networks:
-    - backend-net
+    - crop-yield
     healthcheck:
       test: ["CMD", "redis-cli", "--user", "health", "--pass", "77777", "PING"]
       timeout: 20s
@@ -21,7 +21,7 @@ services:
   recommend-db:
     image: recommend-db
     networks:
-    - backend-net
+    - crop-yield
     healthcheck:
       test: ["CMD", "redis-cli", "--user", "health", "--pass", "77777", "PING"]
       timeout: 20s
@@ -37,7 +37,7 @@ services:
     env_file:
       - .env-auth
     networks:
-    - backend-net
+    - crop-yield
     # ports:
     # - "8080:8080"
 
@@ -52,7 +52,7 @@ services:
     env_file:
       - .env-image
     networks:
-    - backend-net
+    - crop-yield
     # ports:
     # - "8090:8090"
 
@@ -69,7 +69,7 @@ services:
     env_file:
       - .env-recommend
     networks:
-    - backend-net
+    - crop-yield
     # ports:
     # - "8100:8100"
 
@@ -80,17 +80,28 @@ services:
     - image
     - recommend
     networks:
-    - frontend-net 
-    - backend-net
+    - crop-yield
     ports:
-    - "8080:80"
+    - "9090:80"
 
   # another one for the ml workload
+  # todo
 
   # frontend server
-  # one for the front end
-
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    image: frontend
+    volumes:
+      - "${PWD}/frontend:/usr/share/nginx/html:rw"
+    depends_on:
+      - lb-backend
+    networks:
+      - crop-yield
+    ports:
+      - "8080:80"
 # networks
 networks:
-  backend-net: {}
-  frontend-net: {}
+  crop-yield: {}
+

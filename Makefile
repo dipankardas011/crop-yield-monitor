@@ -11,10 +11,13 @@ auth:
 	@echo "building auth"
 	cd authentication && docker build -t auth .
 
-
 lb:
 	@echo "building lb-backend"
 	cd lb-backend && docker build -t lb-backend .
+
+ui:
+	@echo "building frontend"
+	cd frontend && docker build -t frontend .
 
 ####### Database
 image-db:
@@ -30,28 +33,16 @@ recommend-db:
 	cd db/recommend && docker build -t recommend-db .
 
 ####### Build all containers
-build: recommend image auth lb auth-db image-db recommend-db
+build: recommend image auth lb ui auth-db image-db recommend-db
 	@echo "Building done"
-#
-# ####### Run the backend containers(each)
-recommend_run:
-	@echo "running recommend"
-	docker run -dp 8100:8100 --name recommend recommend
 
-image_run:
-	@echo "running image"
-	docker run -dp 8090:8090 --name image image
-
-auth_run:
-	@echo "running auth"
-	docker run -dp 8080:8080 --name auth auth
 
 ######## Start the docker compose
-run: 
+run:
 	docker compose up --detach
 	@echo "Running done"
 
-run-watch: 
+run-watch:
 	docker compose up
 	@echo "Running done"
 
@@ -62,4 +53,4 @@ destroy:
 destroy_all:
 	@echo "deleting containers and images"
 	make destroy
-	docker rmi -f recommend auth image auth-db image-db
+	docker rmi -f recommend image auth lb ui auth-db image-db recommend-db

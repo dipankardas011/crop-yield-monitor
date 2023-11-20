@@ -38,8 +38,6 @@ services:
       - .env-auth
     networks:
     - crop-yield
-    # ports:
-    # - "8080:8080"
 
   image:
     image: image
@@ -53,8 +51,7 @@ services:
       - .env-image
     networks:
     - crop-yield
-    # ports:
-    # - "8090:8090"
+
 
   recommend:
     image: recommend
@@ -70,8 +67,6 @@ services:
       - .env-recommend
     networks:
     - crop-yield
-    # ports:
-    # - "8100:8100"
 
   lb-backend:
     image: lb-backend
@@ -82,25 +77,21 @@ services:
     networks:
     - crop-yield
     ports:
-    - "9090:80"
+      - "9090:80"
 
   # another one for the ml workload
   # todo
 
   # frontend server
   frontend:
-    build:
-      context: frontend
-      dockerfile: Dockerfile
     image: frontend
-    volumes:
-      - "${PWD}/frontend:/usr/share/nginx/html:rw"
     depends_on:
       - lb-backend
     networks:
       - crop-yield
     ports:
-      - "8080:80"
+      - "8080:3000"
+
 # networks
 networks:
   crop-yield: {}

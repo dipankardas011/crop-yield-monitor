@@ -173,11 +173,11 @@ func main() {
 	http.HandleFunc("/image/healthz", makeHTTPHandler(Health))     // User-facing
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},                      // Allow all origins
-		AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
-		AllowedHeaders: []string{"Authorization"},          // Allow Authorization header
-		// AllowCredentials: true,
-		Debug: true,
+		AllowedOrigins:   []string{"http://localhost:8080"},       // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},      // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders:   []string{"Authorization", "Set-Cookie"}, // Allow Authorization header
+		AllowCredentials: true,
+		Debug:            true,
 	})
 
 	s := &http.Server{

@@ -99,6 +99,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) (int, error) {
 		Name:    "user_token",
 		Value:   tokenString,
 		Expires: expirationTime,
+		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)

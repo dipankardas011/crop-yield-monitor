@@ -38,9 +38,17 @@ func makeHTTPHandler(f apiFunc) http.HandlerFunc {
 func makeHTTPCall(r *http.Request, httpMethod, url string, body io.Reader, res any) (int, error) {
 	// it should pass the token extracted from parent functions which call this
 	// Get the JWT token from the Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
+	//authHeader := r.Header.Get("Authorization")
+	//if authHeader == "" {
+	//	return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
+	//}
+
+	userCookie, err := r.Cookie("user_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return http.StatusUnauthorized, apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
+		}
+		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
 
 	request, error := http.NewRequest(httpMethod, url, body)
@@ -48,7 +56,7 @@ func makeHTTPCall(r *http.Request, httpMethod, url string, body io.Reader, res a
 		return http.StatusInternalServerError, error
 	}
 
-	request.Header.Set("Authorization", r.Header.Get("Authorization"))
+	request.Header.Set("Authorization", "Bearer "+userCookie.Value)
 
 	client := &http.Client{}
 

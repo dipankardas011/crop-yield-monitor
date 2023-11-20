@@ -65,8 +65,8 @@
     </header>
 
     <nav>
-        <a href="#login" class="loginlink">Login</a>
-        <a href="#signup" class="signuplink">Signup</a>
+        <a href="#" class="loginlink">Login</a>
+        <a href="#" class="signuplink">Signup</a>
     </nav>
 
     <dialog class="login">
@@ -128,6 +128,7 @@
             try {
                 const response = await fetch('http://localhost:9090/account/signin', {
                     method: 'POST', // Change to POST if necessary
+                    credentials: 'include',
                     body: JSON.stringify({ username: formData.get('username'), password: formData.get('password') }), // Uncomment for POST
                 });
 
@@ -137,6 +138,7 @@
                 if (response.ok) {
                     // Redirect to the dashboard
                     console.log(data);
+                    console.log(response);
                     console.log(data.Account);
                     window.location.href = '/dashboard/';
                 } else {

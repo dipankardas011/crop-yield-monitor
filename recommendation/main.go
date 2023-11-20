@@ -217,9 +217,9 @@ func main() {
 	RECOMMEND_SVR_URL = os.Getenv("DB_URL")
 	PASS = os.Getenv("DB_PASSWORD")
 
-	http.HandleFunc("/recommend/get", makeHTTPHandler(GetRecommendations))
-	http.HandleFunc("/recommend/docs", makeHTTPHandler(Docs))
-	http.HandleFunc("/recommend/healthz", makeHTTPHandler(Health))
+	http.HandleFunc("/recommend/get", makeHTTPHandler(GetRecommendations)) // User-facing
+	http.HandleFunc("/recommend/docs", makeHTTPHandler(Docs))              // User-facing
+	http.HandleFunc("/recommend/healthz", makeHTTPHandler(Health))         // User-facing
 	http.HandleFunc("/recommend/db/read", makeHTTPHandler(DatabaseAccessRead))
 	http.HandleFunc("/recommend/db/write", makeHTTPHandler(DatabaseAccessWrite))
 

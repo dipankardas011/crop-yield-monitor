@@ -53,4 +53,4 @@ destroy:
 destroy_all:
 	@echo "deleting containers and images"
 	make destroy
-	docker rmi -f recommend image auth lb-frontend frontend auth-db image-db recommend-db
+	docker rmi -f recommend image auth lb-backend frontend auth-db image-db recommend-db

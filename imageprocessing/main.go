@@ -35,9 +35,17 @@ func checkAuthenticUser(r *http.Request) (int, string, error) {
 	// it should pass the token extracted from parent functions which call this
 
 	// Get the JWT token from the Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return http.StatusUnauthorized, "", apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
+	//authHeader := r.Header.Get("Authorization")
+	//if authHeader == "" {
+	//	return http.StatusUnauthorized, "", apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
+	//}
+
+	userCookie, err := r.Cookie("user_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return http.StatusUnauthorized, "", apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
+		}
+		return http.StatusInternalServerError, "", apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
 
 	request, error := http.NewRequest(http.MethodGet, AUTH_SVR_URL, nil)
@@ -45,7 +53,7 @@ func checkAuthenticUser(r *http.Request) (int, string, error) {
 		return http.StatusInternalServerError, "", error
 	}
 
-	request.Header.Set("Authorization", r.Header.Get("Authorization"))
+	request.Header.Set("Authorization", "Bearer "+userCookie.Value)
 
 	client := &http.Client{}
 
@@ -159,10 +167,10 @@ func main() {
 	IMG_SVR_URL = os.Getenv("DB_URL")
 	PASS = os.Getenv("DB_PASSWORD")
 
-	http.HandleFunc("/image/upload", makeHTTPHandler(imageUpload))
-	http.HandleFunc("/image/get", makeHTTPHandler(imageGet))
-	http.HandleFunc("/image/docs", makeHTTPHandler(Docs))
-	http.HandleFunc("/image/healthz", makeHTTPHandler(Health))
+	http.HandleFunc("/image/upload", makeHTTPHandler(imageUpload)) // User-facing
+	http.HandleFunc("/image/get", makeHTTPHandler(imageGet))       // User-facing
+	http.HandleFunc("/image/docs", makeHTTPHandler(Docs))          // User-facing
+	http.HandleFunc("/image/healthz", makeHTTPHandler(Health))     // User-facing
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},                      // Allow all origins

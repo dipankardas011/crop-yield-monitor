@@ -42,8 +42,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: BadJsonFormat.String() + "\nReason: " + err.Error()}
 	}
 
-	log.Println(account)
-
 	if err := sqlClient.CreateUser(account); err != nil {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
@@ -96,6 +94,14 @@ func SignIn(w http.ResponseWriter, r *http.Request) (int, error) {
 	if err != nil {
 		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
+
+	cookie := &http.Cookie{
+		Name:    "user_token",
+		Value:   tokenString,
+		Expires: expirationTime,
+	}
+
+	http.SetCookie(w, cookie)
 
 	return writeJson(w, http.StatusOK, Response{
 		Stdout: "Login Successful",
@@ -173,7 +179,16 @@ func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
 	}
 
-	// Extract the token from the header (assuming Bearer token format)
+	userCookie, err := r.Cookie("user_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return http.StatusUnauthorized, apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
+		}
+		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
+	}
+	userCookie.Expires = time.Unix(0, 0)
+
+	http.SetCookie(w, userCookie)
 
 	_ = strings.TrimPrefix(authHeader, "Bearer ")
 
@@ -262,21 +277,21 @@ func main() {
 	dbPassword = os.Getenv("DB_PASSWORD")
 	jwtKey = []byte(generateRandomToken(20))
 
-	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn))
-	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp))
-	http.HandleFunc("/account/logout", makeHTTPHandler(Logout))
+	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn)) // User-facing
+	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp)) // User-facing
+	http.HandleFunc("/account/logout", makeHTTPHandler(Logout)) // User-facing
 	http.HandleFunc("/account/renew", makeHTTPHandler(Refresh))
 	http.HandleFunc("/account/token", makeHTTPHandler(IsAuthenticToken))
 
-	http.HandleFunc("/account/docs", makeHTTPHandler(Docs))
-	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))
+	http.HandleFunc("/account/docs", makeHTTPHandler(Docs))      // User-facing
+	http.HandleFunc("/account/healthz", makeHTTPHandler(Health)) // User-facing
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},                      // Allow all origins
-		AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
-		AllowedHeaders: []string{"Authorization"},          // Allow Authorization header
-		// AllowCredentials: true,
-		Debug: true,
+		AllowedOrigins:   []string{"http://localhost:8080"},       // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},      // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders:   []string{"Authorization", "Set-Cookie"}, // Allow Authorization header
+		AllowCredentials: true,
+		Debug:            true,
 	})
 
 	s := &http.Server{

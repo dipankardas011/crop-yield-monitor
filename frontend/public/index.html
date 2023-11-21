@@ -78,6 +78,7 @@
             <input type="password" name="password" placeholder="Password" required>
             <button type="button" onclick="login()">Login</button>
         </form>
+	<div id="resultlogin" role="alert"></div>
     </dialog>
 
     <dialog class="signup">
@@ -90,14 +91,15 @@
             <input type="email" name="email" placeholder="Email" required>
             <button type="button" onclick="signup()">Signup</button>
         </form>
-		<div id="result" role="alert"></div>
+	<div id="resultsignup" role="alert"></div>
     </dialog>
 
     <script>
         const signupdialog = document.querySelector(".signup");
         const logindialog = document.querySelector(".login");
 
-	    const resultDiv= document.getElementById('result');
+	const resultDivSignup = document.getElementById('resultsignup');
+	const resultDivLogin = document.getElementById('resultlogin');
 
         const showLogin = document.querySelector(".loginlink");
         const showSignup = document.querySelector(".signuplink");
@@ -148,13 +150,15 @@
                     console.log(response);
                     console.log(data.Account);
 
-
+                    resultDivLogin.textContent = 'Login successful: '+String(data);
                     window.location.href = '/dashboard/';
                 } else {
                     // Handle login failure (display an error message, etc.)
                     console.error('Login failed:', data.error);
+                    resultDivLogin.textContent = 'Login Failed: '+String(data.error);
                 }
             } catch (error) {
+                resultDivLogin.textContent = 'Login Failed: '+error;
                 console.error('Error during login:', error);
             }
         }
@@ -179,14 +183,16 @@
                 // Check for successful signup (adjust based on your backend response structure)
                 if (response.ok) {
                     // Redirect to the login page or perform other actions as needed
-                    resultDiv.textContent = 'Signup successful: '+String(data);
-                    resultDiv.classList.add("alert", "alert-success");
+                    resultDivSignup.textContent = 'Signup successful: '+String(data);
+                    resultDivSignup.classList.add("alert", "alert-success");
                 } else {
                     // Handle signup failure (display an error message, etc.)
                     console.error('Signup failed:', data.error);
+                    resultDivSignup.textContent = 'Signup failed: '+String(data.error);
                 }
             } catch (error) {
                 console.error('Error during signup:', error);
+                resultDivSignup.textContent = 'Signup failed: '+String(error);
             }
         }
     </script>

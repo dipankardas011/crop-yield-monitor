@@ -205,9 +205,7 @@ func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusUnauthorized, err
 	}
 
-	userCookie.Value = ""
-
-	http.SetCookie(w, userCookie)
+	http.SetCookie(w, &http.Cookie{Name: "user_token"})
 
 	return writeJson(w, http.StatusOK, Response{Stdout: "logout success of " + claims.Username})
 }

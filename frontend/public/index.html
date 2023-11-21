@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Yield Monitor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            margin: 0 10px;
+        }
+
+        section {
+            padding: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Crop Yield Monitor</h1>
+    </header>
+
+    <nav>
+        <a href="#" class="loginlink">Login</a>
+        <a href="#" class="signuplink">Signup</a>
+    </nav>
+
+    <dialog class="login">
+        <h2>Login</h2>
+        <button class="closelogin" autofocus>Close</button>
+        <form id="loginForm">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="button" onclick="login()">Login</button>
+        </form>
+	<div id="resultlogin" role="alert"></div>
+    </dialog>
+
+    <dialog class="signup">
+        <h2>Signup</h2>
+        <button class="closesignup" autofocus>Close</button>
+        <form id="signupForm">
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <button type="button" onclick="signup()">Signup</button>
+        </form>
+	<div id="resultsignup" role="alert"></div>
+    </dialog>
+
+    <script>
+        const signupdialog = document.querySelector(".signup");
+        const logindialog = document.querySelector(".login");
+
+	const resultDivSignup = document.getElementById('resultsignup');
+	const resultDivLogin = document.getElementById('resultlogin');
+
+        const showLogin = document.querySelector(".loginlink");
+        const showSignup = document.querySelector(".signuplink");
+
+        const closeButtonLogin = document.querySelector(".closelogin");
+        const closeButtonSignup = document.querySelector(".closesignup");
+
+        closeButtonSignup.style.backgroundColor = "red";
+        closeButtonLogin.style.backgroundColor = "red";
+
+        // "Show the dialog" button opens the dialog modally
+        showSignup.addEventListener("click", () => {
+            signupdialog.showModal();
+        });
+
+        showLogin.addEventListener("click", () => {
+            logindialog.showModal();
+        });
+
+        // "Close" button closes the dialog
+        closeButtonLogin.addEventListener("click", () => {
+            logindialog.close();
+        });
+
+        closeButtonSignup.addEventListener("click", () => {
+            signupdialog.close();
+        });
+
+        async function login() {
+            const form = document.getElementById('loginForm');
+            const formData = new FormData(form);
+
+            console.log(formData);
+
+            try {
+                const response = await fetch('http://localhost:9090/account/signin', {
+                    method: 'POST', // Change to POST if necessary
+                    credentials: 'include',
+                    body: JSON.stringify({ username: formData.get('username'), password: formData.get('password') }), // Uncomment for POST
+                });
+
+                const data = await response.json();
+
+                // Check for successful login (adjust based on your backend response structure)
+                if (response.ok) {
+                    // Redirect to the dashboard
+                    console.log(data);
+                    console.log(response);
+                    console.log(data.Account);
+
+                    resultDivLogin.textContent = 'Login successful: '+String(data);
+                    window.location.href = '/dashboard/';
+                } else {
+                    // Handle login failure (display an error message, etc.)
+                    console.error('Login failed:', data.error);
+                    resultDivLogin.textContent = 'Login Failed: '+String(data.error);
+                }
+            } catch (error) {
+                resultDivLogin.textContent = 'Login Failed: '+error;
+                console.error('Error during login:', error);
+            }
+        }
+
+        async function signup() {
+            const form = document.getElementById('signupForm');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('http://localhost:9090/account/signup', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        username: formData.get('username'),
+                        password: formData.get('password'),
+                        email: formData.get('email'),
+                    }),
+                });
+
+                const data = await response.json();
+
+                // Check for successful signup (adjust based on your backend response structure)
+                if (response.ok) {
+                    // Redirect to the login page or perform other actions as needed
+                    resultDivSignup.textContent = 'Signup successful: '+String(data);
+                    resultDivSignup.classList.add("alert", "alert-success");
+                } else {
+                    // Handle signup failure (display an error message, etc.)
+                    console.error('Signup failed:', data.error);
+                    resultDivSignup.textContent = 'Signup failed: '+String(data.error);
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                resultDivSignup.textContent = 'Signup failed: '+String(error);
+            }
+        }
+    </script>
+</body>
+
+</html>

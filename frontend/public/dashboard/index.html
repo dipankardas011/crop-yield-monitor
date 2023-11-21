@@ -1,0 +1,146 @@
+<!-- dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard - Crop Yield Monitor</title>
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        section {
+            padding: 20px;
+        }
+
+        nav {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            margin: 0 10px;
+        }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <h1>Crop Yield Monitor - Dashboard</h1>
+        </header>
+
+        <nav>
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
+
+        <section>
+            <p>Welcome to your dashboard!</p>
+
+        </section>
+
+        <h2>Upload Image</h2>
+        <input type="file" id="fileInput" accept="image/*">
+        <h3>Bytes Output:</h3>
+        <textarea id="outputBytes" rows="10" cols="80" readonly></textarea>
+
+        <h2>Get Recommendations</h2>
+        <button type="button" onclick="recommend()">Recommend</button>
+        <textarea id="recommend" rows="10" cols="80" readonly></textarea>
+    </body>
+
+    <script>
+    async function logout() {
+        try {
+            const response = await fetch('http://localhost:9090/account/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+
+            const data = await response.json();
+
+            // Check for successful login (adjust based on your backend response structure)
+            if (response.ok) {
+                // Redirect to the dashboard
+                window.location.href = '/';
+            } else {
+                // Handle login failure (display an error message, etc.)
+                console.error('failed to logout:', data.error);
+            }
+        } catch (error) {
+            console.error('Error during logging out:', error);
+        }
+    }
+
+    async function recommend() {
+
+        try {
+            const response = await fetch('http://localhost:9090/recommend/get', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            const data = await response.json();
+
+            // Check for successful login (adjust based on your backend response structure)
+            if (response.ok) {
+                // Redirect to the dashboard
+                console.log(data);
+                console.log(response);
+                document.getElementById("recommend").value = String(data.Recommendations); 
+            } else {
+                // Handle login failure (display an error message, etc.)
+                console.error('recommend failed:', data.error);
+            }
+        } catch (error) {
+            console.error('Error during recommendation gen:', error);
+        }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        let format = file.type;
+        if (file.type === "image/png" || file.type === "image/jpeg") {
+            console.log("Image format");
+        } else {
+            console.log("Image format: Unknown");
+            alert("Invalid file");
+            exit(1);
+        }
+
+        const reader = new FileReader();
+
+        reader.onloadend = function () {
+            const arrayBuffer = reader.result;
+            const byteArray = new Uint8Array(arrayBuffer);
+            const byteValues = Array.from(byteArray);
+
+            document.getElementById('outputBytes').value = JSON.stringify(byteValues);
+
+            fetch('http://localhost:9090/image/upload', {
+                method: 'POST',
+                credentials: 'include',
+                body: JSON.stringify({ raw_image_bytes: byteValues, image_format: String(format) })
+            }).then(response => response.json())
+                .then(data => console.log(data));
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+    </script>
+</html>

@@ -3,7 +3,7 @@ services:
   auth-db:
     image: auth-db
     networks:
-    - backend-net
+    - crop-yield
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
@@ -12,7 +12,7 @@ services:
   image-db:
     image: image-db
     networks:
-    - backend-net
+    - crop-yield
     healthcheck:
       test: ["CMD", "redis-cli", "--user", "health", "--pass", "77777", "PING"]
       timeout: 20s
@@ -21,7 +21,7 @@ services:
   recommend-db:
     image: recommend-db
     networks:
-    - backend-net
+    - crop-yield
     healthcheck:
       test: ["CMD", "redis-cli", "--user", "health", "--pass", "77777", "PING"]
       timeout: 20s
@@ -37,9 +37,7 @@ services:
     env_file:
       - .env-auth
     networks:
-    - backend-net
-    # ports:
-    # - "8080:8080"
+    - crop-yield
 
   image:
     image: image
@@ -52,9 +50,8 @@ services:
     env_file:
       - .env-image
     networks:
-    - backend-net
-    # ports:
-    # - "8090:8090"
+    - crop-yield
+
 
   recommend:
     image: recommend
@@ -69,9 +66,7 @@ services:
     env_file:
       - .env-recommend
     networks:
-    - backend-net
-    # ports:
-    # - "8100:8100"
+    - crop-yield
 
   lb-backend:
     image: lb-backend
@@ -80,17 +75,24 @@ services:
     - image
     - recommend
     networks:
-    - frontend-net 
-    - backend-net
+    - crop-yield
     ports:
-    - "8080:80"
+      - "9090:80"
 
   # another one for the ml workload
+  # todo
 
   # frontend server
-  # one for the front end
+  frontend:
+    image: frontend
+    depends_on:
+      - lb-backend
+    networks:
+      - crop-yield
+    ports:
+      - "8080:3000"
 
 # networks
 networks:
-  backend-net: {}
-  frontend-net: {}
+  crop-yield: {}
+

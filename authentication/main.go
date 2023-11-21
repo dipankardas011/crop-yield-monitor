@@ -42,8 +42,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: BadJsonFormat.String() + "\nReason: " + err.Error()}
 	}
 
-	log.Println(account)
-
 	if err := sqlClient.CreateUser(account); err != nil {
 		return http.StatusBadRequest, apiError{Status: http.StatusBadRequest, Err: err.Error()}
 	}
@@ -96,6 +94,15 @@ func SignIn(w http.ResponseWriter, r *http.Request) (int, error) {
 	if err != nil {
 		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
+
+	cookie := &http.Cookie{
+		Name:    "user_token",
+		Value:   tokenString,
+		Expires: expirationTime,
+		Path:    "/",
+	}
+
+	http.SetCookie(w, cookie)
 
 	return writeJson(w, http.StatusOK, Response{
 		Stdout: "Login Successful",
@@ -164,23 +171,41 @@ func Refresh(w http.ResponseWriter, r *http.Request) (int, error) {
 func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	if r.Method != http.MethodPost {
-		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
+		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected POST", Status: http.StatusMethodNotAllowed}
 	}
 
 	// Get the JWT token from the Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
+
+	userCookie, err := r.Cookie("user_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return http.StatusUnauthorized, apiError{Err: err.Error(), Status: http.StatusUnauthorized}
+		}
+		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
 
-	// Extract the token from the header (assuming Bearer token format)
-
-	_ = strings.TrimPrefix(authHeader, "Bearer ")
+	userCookie.Expires = time.Unix(0, 0)
+	tknStr := userCookie.Value
 
 	// FIXME: to enhance security, you can maintain a blacklist of invalidated tokens on the server-side. When a user logs out, you can add the current token to the blacklist.
 	// 	For each request, you can check if the token in the Authorization header is not in the blacklist before processing the request. This extra step helps prevent the use of invalidated tokens even if they are somehow retained by the client.
 
 	claims := &Claims{}
+
+	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return http.StatusUnauthorized, err
+		}
+		return http.StatusBadRequest, err
+	}
+	if !tkn.Valid {
+		return http.StatusUnauthorized, err
+	}
+
+	http.SetCookie(w, &http.Cookie{Name: "user_token"})
 
 	return writeJson(w, http.StatusOK, Response{Stdout: "logout success of " + claims.Username})
 }
@@ -262,21 +287,21 @@ func main() {
 	dbPassword = os.Getenv("DB_PASSWORD")
 	jwtKey = []byte(generateRandomToken(20))
 
-	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn))
-	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp))
-	http.HandleFunc("/account/logout", makeHTTPHandler(Logout))
+	http.HandleFunc("/account/signin", makeHTTPHandler(SignIn)) // User-facing
+	http.HandleFunc("/account/signup", makeHTTPHandler(SignUp)) // User-facing
+	http.HandleFunc("/account/logout", makeHTTPHandler(Logout)) // User-facing
 	http.HandleFunc("/account/renew", makeHTTPHandler(Refresh))
 	http.HandleFunc("/account/token", makeHTTPHandler(IsAuthenticToken))
 
-	http.HandleFunc("/account/docs", makeHTTPHandler(Docs))
-	http.HandleFunc("/account/healthz", makeHTTPHandler(Health))
+	http.HandleFunc("/account/docs", makeHTTPHandler(Docs))      // User-facing
+	http.HandleFunc("/account/healthz", makeHTTPHandler(Health)) // User-facing
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},                      // Allow all origins
-		AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Allow GET, POST, and OPTIONS methods
-		AllowedHeaders: []string{"Authorization"},          // Allow Authorization header
-		// AllowCredentials: true,
-		Debug: true,
+		AllowedOrigins:   []string{"http://localhost:8080"},       // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},      // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders:   []string{"Authorization", "Set-Cookie"}, // Allow Authorization header
+		AllowCredentials: true,
+		Debug:            true,
 	})
 
 	s := &http.Server{

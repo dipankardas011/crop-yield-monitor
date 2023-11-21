@@ -11,9 +11,13 @@
 # Demo Try
 
 ```bash
-make build
+make build # build all the containers
 
-make run
+make run # run the docker compose up -d
 
-make destroy_all
+# Visit the browser in localhost:8080
+
+make destroy # to stop the containers
+
+make destroy_all # to delete all the images for crop-yield-monitor
 ```

@@ -56,6 +56,7 @@
             border: none;
             cursor: pointer;
         }
+
     </style>
 </head>
 
@@ -89,17 +90,23 @@
             <input type="email" name="email" placeholder="Email" required>
             <button type="button" onclick="signup()">Signup</button>
         </form>
+		<div id="result" role="alert"></div>
     </dialog>
 
     <script>
         const signupdialog = document.querySelector(".signup");
         const logindialog = document.querySelector(".login");
 
+	    const resultDiv= document.getElementById('result');
+
         const showLogin = document.querySelector(".loginlink");
         const showSignup = document.querySelector(".signuplink");
 
         const closeButtonLogin = document.querySelector(".closelogin");
         const closeButtonSignup = document.querySelector(".closesignup");
+
+        closeButtonSignup.style.backgroundColor = "red";
+        closeButtonLogin.style.backgroundColor = "red";
 
         // "Show the dialog" button opens the dialog modally
         showSignup.addEventListener("click", () => {
@@ -140,6 +147,8 @@
                     console.log(data);
                     console.log(response);
                     console.log(data.Account);
+
+
                     window.location.href = '/dashboard/';
                 } else {
                     // Handle login failure (display an error message, etc.)
@@ -170,7 +179,8 @@
                 // Check for successful signup (adjust based on your backend response structure)
                 if (response.ok) {
                     // Redirect to the login page or perform other actions as needed
-                    window.location.href = '#login';
+                    resultDiv.textContent = 'Signup successful: '+String(data);
+                    resultDiv.classList.add("alert", "alert-success");
                 } else {
                     // Handle signup failure (display an error message, etc.)
                     console.error('Signup failed:', data.error);

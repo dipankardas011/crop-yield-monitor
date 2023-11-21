@@ -66,8 +66,6 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 		return status, err
 	}
 
-	fmt.Println(username)
-
 	// first check with the key in the nosql db
 	// if we didn't find it we will trigger the ml workload
 	// and pass the status to the ml
@@ -79,9 +77,9 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 	if err != nil {
 		if err == redis.Nil {
 			// need to write to the db
-			recommend := Recommendations{Status: RecommendationNotReady}
+			recommend = &Recommendations{Status: RecommendationNotReady}
 
-			if err := dbClient.WriteRecommendations(username, recommend); err != nil {
+			if err := dbClient.WriteRecommendations(username, *recommend); err != nil {
 				return http.StatusInternalServerError, err
 			}
 		} else {
@@ -114,16 +112,26 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 			return http.StatusInternalServerError, err
 		}
 
+		userCookie, err := r.Cookie("user_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				return http.StatusUnauthorized, apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
+			}
+			return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
+		}
+
 		// Set content type to application/json
 		req.Header.Set("Content-Type", "application/json")
 		// sharing the authorization link
-		req.Header.Set("Authorization", r.Header.Get("Authorization"))
+		req.Header.Set("Authorization", "Bearer "+userCookie.Value)
 
 		// Use http.DefaultClient to send the request without waiting for the response
-		_, err = http.DefaultClient.Do(req)
-		if err != nil {
-			return http.StatusInternalServerError, err
-		}
+
+		// TODO: once the ml is ready do add it
+		// _, err = http.DefaultClient.Do(req)
+		// if err != nil {
+		// 	return http.StatusInternalServerError, err
+		// }
 	}
 
 	return writeJson(w, http.StatusOK, Response{
@@ -224,11 +232,11 @@ func main() {
 	http.HandleFunc("/recommend/db/write", makeHTTPHandler(DatabaseAccessWrite))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},                      // Allow all origins
-		AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Allow GET, OPTIONS methods
-		AllowedHeaders: []string{"Authorization"},          // Allow Authorization header
-		// AllowCredentials: true,
-		Debug: true,
+		AllowedOrigins:   []string{"http://localhost:8080"},       // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},      // Allow GET, POST, and OPTIONS methods
+		AllowedHeaders:   []string{"Authorization", "Set-Cookie"}, // Allow Authorization header
+		AllowCredentials: true,
+		Debug:            true,
 	})
 
 	s := &http.Server{

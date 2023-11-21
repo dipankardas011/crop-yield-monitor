@@ -171,32 +171,43 @@ func Refresh(w http.ResponseWriter, r *http.Request) (int, error) {
 func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	if r.Method != http.MethodPost {
-		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected GET", Status: http.StatusMethodNotAllowed}
+		return http.StatusMethodNotAllowed, apiError{Err: "Bad Method, expected POST", Status: http.StatusMethodNotAllowed}
 	}
 
 	// Get the JWT token from the Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return http.StatusUnauthorized, apiError{Err: "Missing Authorization header", Status: http.StatusUnauthorized}
-	}
 
 	userCookie, err := r.Cookie("user_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			return http.StatusUnauthorized, apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
+			return http.StatusUnauthorized, apiError{Err: err.Error(), Status: http.StatusUnauthorized}
 		}
 		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
 	}
+
 	userCookie.Expires = time.Unix(0, 0)
-
-	http.SetCookie(w, userCookie)
-
-	_ = strings.TrimPrefix(authHeader, "Bearer ")
+	tknStr := userCookie.Value
 
 	// FIXME: to enhance security, you can maintain a blacklist of invalidated tokens on the server-side. When a user logs out, you can add the current token to the blacklist.
 	// 	For each request, you can check if the token in the Authorization header is not in the blacklist before processing the request. This extra step helps prevent the use of invalidated tokens even if they are somehow retained by the client.
 
 	claims := &Claims{}
+
+	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return http.StatusUnauthorized, err
+		}
+		return http.StatusBadRequest, err
+	}
+	if !tkn.Valid {
+		return http.StatusUnauthorized, err
+	}
+
+	userCookie.Value = ""
+
+	http.SetCookie(w, userCookie)
 
 	return writeJson(w, http.StatusOK, Response{Stdout: "logout success of " + claims.Username})
 }

@@ -48,7 +48,7 @@
             <input type="email" class="instance-child" name="email" placeholder="Email" required>
 
             <br>
-            <button type="submit" class="signup" onclick="signup()">Signup</button>
+            <button type="button" class="signup" onclick="signup()">Signup</button>
           </form>
           <div id="resultsignup" role="alert"></div>
         </div>
@@ -100,9 +100,8 @@
       // Check for successful signup (adjust based on your backend response structure)
       if (response.ok) {
         // Redirect to the login page or perform other actions as needed
-        resultDivSignup.textContent = 'Signup successful: ' + String(data);
+        resultDivSignup.textContent = 'Signup successful: ' + JSON.stringify(data, null, 2);
         resultDivSignup.style.color = 'green';
-        resultDivSignup.classList.add("alert", "alert-success");
       } else {
         // Handle signup failure (display an error message, etc.)
         console.error('Signup failed:', data.error);

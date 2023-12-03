@@ -42,7 +42,7 @@
             <input type="password" class="instance-child" name="password" placeholder="Password" required>
             <br>
 
-            <button type="submit" class="login" onclick="login()">Login</button>
+            <button type="button" class="login" onclick="login()">Login</button>
           </form>
           <br>
           <div id="resultlogin" role="alert"></div>
@@ -86,7 +86,7 @@
         if (response.ok) {
           // Redirect to the dashboard
 
-          resultDivLogin.textContent = 'Login successful: ' + String(data);
+          resultDivLogin.textContent = 'Login successful: ' + JSON.stringify(data, null, 2);
           resultDivLogin.style.color = 'green';
           window.location.href = '/dashboard/';
         } else {

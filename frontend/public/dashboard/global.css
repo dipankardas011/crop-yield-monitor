@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  line-height: normal;
+}
+
+:root {
+  /* fonts */
+  --font-poppins: Poppins;
+
+  /* font sizes */
+  --font-size-8xl: 27px;
+
+  /* Colors */
+  --color-white: #fff;
+  --color-blueviolet: #9955ff;
+  --color-green: #378606;
+
+  /* Border radiuses */
+  --br-sm: 14px;
+  --br-19xl: 38px;
+}

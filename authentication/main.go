@@ -187,9 +187,6 @@ func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 	userCookie.Expires = time.Unix(0, 0)
 	tknStr := userCookie.Value
 
-	// FIXME: to enhance security, you can maintain a blacklist of invalidated tokens on the server-side. When a user logs out, you can add the current token to the blacklist.
-	// 	For each request, you can check if the token in the Authorization header is not in the blacklist before processing the request. This extra step helps prevent the use of invalidated tokens even if they are somehow retained by the client.
-
 	claims := &Claims{}
 
 	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
@@ -205,7 +202,7 @@ func Logout(w http.ResponseWriter, r *http.Request) (int, error) {
 		return http.StatusUnauthorized, err
 	}
 
-	http.SetCookie(w, &http.Cookie{Name: "user_token"})
+	http.SetCookie(w, &http.Cookie{Name: "user_token", Path: "/"})
 
 	return writeJson(w, http.StatusOK, Response{Stdout: "logout success of " + claims.Username})
 }

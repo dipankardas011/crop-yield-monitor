@@ -101,8 +101,6 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 			return stat, err
 		}
 
-		fmt.Printf("Image: %v\n", rawImg)
-
 		rawImgPayload, err := json.Marshal(rawImg)
 		if err != nil {
 			return http.StatusInternalServerError, err

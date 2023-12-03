@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crop Yield Monitor</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,28 +63,32 @@
 </head>
 
 <body>
-    <header>
+    <header class="bg-dark text-white">
         <h1>Crop Yield Monitor</h1>
     </header>
 
-    <nav>
-        <a href="/login" class="loginlink">Login</a>
-        <a href="/signup" class="signuplink">Signup</a>
+    <nav class="bg-secondary">
+        <a href="/login" class="text-white">Login</a>
+        <a href="/signup" class="text-white">Signup</a>
     </nav>
-    <div>
-        Welcome to the Crop yeild montior
-    </div>
-    <div>
-        <p>Developers</p>
-        <ul>
-            <li>Dipankar</li>
-            <li>Ayush</li>
-        </ul>
-        <p>Non Code contributions</p>
-        <ul>
-            <li>Rohan</li>
-            <li>Arpit</li>
-        </ul>
+
+    <div class="container mt-4">
+        <div class="jumbotron">
+            <h2>Welcome to the Crop Yield Monitor</h2>
+        </div>
+
+        <div>
+            <h3>Developers</h3>
+            <ul class="list-group">
+                <li class="list-group-item">Dipankar</li>
+                <li class="list-group-item">Ayush</li>
+            </ul>
+            <h3>Non Code contributions</h3>
+            <ul class="list-group">
+                <li class="list-group-item">Rohan</li>
+                <li class="list-group-item">Arpit</li>
+            </ul>
+        </div>
     </div>
 </body>
 

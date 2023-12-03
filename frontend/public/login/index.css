@@ -273,7 +273,7 @@
 }
 .image {
   position: absolute;
-  top: 0;
+  /* top: 0; */
   left: 754px;
   border-radius: var(--br-26xl) 0 0 var(--br-26xl);
   width: 781.5px;

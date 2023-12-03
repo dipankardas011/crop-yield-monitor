@@ -159,9 +159,9 @@
   font-weight: 500;
 }
 .have-an-account-sign-in-wrapper {
-  position: relative;
-  width: 183px;
-  height: 21px;
+  /* position: relative; */
+  /* width: 183px; */
+  /* height: 21px; */
 }
 .group-wrapper {
   position: absolute;
@@ -318,10 +318,10 @@
 }
 .image {
   position: absolute;
-  top: 0;
-  left: 754px;
+  /* top: 0; */
+  left: 800px;
   border-radius: var(--br-26xl) 0 0 var(--br-26xl);
-  width: 781.5px;
+  width: 700px;
   height: 1042px;
   object-fit: cover;
 }

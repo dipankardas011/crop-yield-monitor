@@ -14,9 +14,9 @@
 </head>
 
 <body class="container">
-  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #A3EBB1;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Crop Yeild Monitor [[Recommendation]]</a>
+      <a class="navbar-brand" href="#">Crop Yield Monitor [[Recommendation]]</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -33,6 +33,7 @@
       </div>
     </div>
   </nav>
+
   <main>
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
       <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
@@ -61,7 +62,7 @@
       <div class="mb-3">
         <h3>select the soil image file to upload</h3>
         <br>
-        <input type="file" id="fileInput" accept="image/*">
+        <input type="file" id="fileInput" class="form-control" accept="image/*">
       </div>
       <br>
       <div id="imageResp"></div>
@@ -122,17 +123,17 @@
           if (response.ok) {
             // Redirect to the dashboard
             result.textContent = JSON.stringify(data.recommendations, null, 2);
-            result.style.color = 'green';
+            result.classList.add("alert", "alert-success");
           } else {
             // Handle login failure (display an error message, etc.)
             console.error('recommend failed:', data.error);
             result.textContent = String(data.error);
-            result.style.color = 'red';
+            result.classList.add("alert", "alert-danger");
           }
         } catch (error) {
           console.error('Error during recommendation gen:', error);
             result.textContent = error;
-            result.style.color = 'red';
+            result.classList.add("alert", "alert-danger");
         }
       }
 
@@ -164,11 +165,11 @@
           }).then(response => response.json())
             .then(data => {
               result.textContent = JSON.stringify(data, null, 2);
-              result.style.color = 'green';
+              result.classList.add("alert", "alert-success");
             }).catch(error => {
               console.error('Error:', error)
               result.textContent = error;
-              result.style.color = 'red';
+              result.classList.add("alert", "alert-danger");
             });
         };
         reader.readAsArrayBuffer(file);

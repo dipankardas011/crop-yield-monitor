@@ -3,9 +3,9 @@
   font-weight: 500;
 }
 .get-started-now-wrapper {
-  position: absolute;
+  /* position: absolute;
   top: 0;
-  left: 0;
+  left: 0; */
   height: 52.53px;
   display: flex;
   flex-direction: row;
@@ -325,14 +325,22 @@
   height: 1042px;
   object-fit: cover;
 }
-.sign-up {
-  position: relative;
-  background-color: var(--color-white);
-  width: 100%;
-  height: 1042px;
-  overflow: hidden;
-  text-align: left;
-  font-size: var(--font-size-sm);
-  color: var(--color-black);
-  font-family: var(--font-poppins);
+
+.signup {
+  border-radius: var(--br-3xs);
+  background-color: var(--color-darkolivegreen);
+  border: 1px solid var(--color-darkolivegreen);
+  box-sizing: border-box;
+  /* width: max-content;
+  height: fit-content; */
+  font-size: var(--font-size-smi);
+  color: var(--color-white);
+  cursor: pointer; /* Added cursor property for better user feedback */
+  padding: 10px 15px;
+  border-radius: 5px; /* Added border-radius for rounded corners */
+}
+
+/* Added a hover effect for better user interaction */
+.signup:hover {
+  background-color: #0c2cb8;
 }

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1, width=device-width" />
+
+  <link rel="stylesheet" href="./global.css" />
+  <link rel="stylesheet" href="./index.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" />
+</head>
+
+<body>
+  <div class="sign-up">
+    <div class="sign-up-inner">
+      <div class="frame-parent">
+        <div class="get-started-now-wrapper">
+          <div class="get-started-now">Get Started Now</div>
+        </div>
+
+        <div class="get-started-now-wrapper">
+          <div class="welcome-back">Signup</div>
+        </div>
+
+        <div class="frame-container">
+          <form id="signupForm">
+            <div class="name-wrapper">
+              <div class="get-started-now">Name</div>
+            </div>
+            <input type="text" class="instance-child" name="name" placeholder="Name" required>
+            <br>
+
+            <div class="name-wrapper">
+              <div class="get-started-now">Username</div>
+            </div>
+            <input type="text" class="instance-child" name="username" placeholder="Username" required>
+            <br>
+
+            <div class="name-wrapper">
+              <div class="get-started-now">Password</div>
+            </div>
+            <input type="password" class="instance-child" name="password" placeholder="Password" required>
+            <br>
+
+            <div class="name-wrapper">
+              <div class="get-started-now">Email</div>
+            </div>
+            <input type="email" class="instance-child" name="email" placeholder="Email" required>
+
+            <br>
+            <button type="button" class="signup" onclick="signup()">Signup</button>
+          </form>
+          <div id="resultsignup" role="alert"></div>
+        </div>
+      </div>
+
+      <br>
+
+      <!-- <div class="line-parent">
+        <div class="frame-item"></div>
+        <div class="or-wrapper">
+          <div class="get-started-now">Or</div>
+        </div>
+      </div> -->
+      <div class="group-wrapper">
+        <div class="have-an-account-sign-in-wrapper">
+          <div class="have-an-account-container">
+            <span>Have an account? </span>
+            <span class="sign-in"><a href="/login">Sign In</a></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <img class="image" alt="" src="image.png" />
+  </div>
+</body>
+<script>
+
+  const resultDivSignup = document.getElementById('resultsignup');
+
+  async function signup() {
+    const form = document.getElementById('signupForm');
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('http://localhost:9090/account/signup', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.get('name'),
+          username: formData.get('username'),
+          password: formData.get('password'),
+          email: formData.get('email'),
+        }),
+      });
+
+      const data = await response.json();
+
+      // Check for successful signup (adjust based on your backend response structure)
+      if (response.ok) {
+        // Redirect to the login page or perform other actions as needed
+        resultDivSignup.textContent = 'Signup successful: ' + JSON.stringify(data, null, 2);
+        resultDivSignup.style.color = 'green';
+      } else {
+        // Handle signup failure (display an error message, etc.)
+        console.error('Signup failed:', data.error);
+        resultDivSignup.style.color = 'red';
+        resultDivSignup.textContent = 'Signup failed: ' + String(data.error);
+      }
+    } catch (error) {
+      console.error('Error during signup:', error);
+      resultDivSignup.style.color = 'red';
+      resultDivSignup.textContent = 'Signup failed: ' + String(error);
+    }
+  }
+</script>
+
+</html>

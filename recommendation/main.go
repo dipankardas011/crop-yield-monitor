@@ -47,7 +47,7 @@ func getImage(r *http.Request) (int, *Image, error) {
 
 	payload := ImgResponse{}
 
-	stat, err := makeHTTPCall(r, http.MethodGet, AUTH_SVR_URL, nil, &payload)
+	stat, err := makeHTTPCall(r, http.MethodGet, IMG_SVR_URL, nil, &payload)
 	if err != nil {
 		return stat, nil, err
 	}
@@ -128,10 +128,11 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 		// Use http.DefaultClient to send the request without waiting for the response
 
 		// TODO: once the ml is ready do add it
-		// _, err = http.DefaultClient.Do(req)
+		_, err = http.DefaultClient.Do(req)
 		// if err != nil {
 		// 	return http.StatusInternalServerError, err
 		// }
+		recommend.Crops = []string{"rice-demo", "maze-demo"} // remove this before adding ml
 	}
 
 	return writeJson(w, http.StatusOK, Response{

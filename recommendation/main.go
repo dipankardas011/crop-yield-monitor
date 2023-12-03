@@ -128,7 +128,7 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 		// Use http.DefaultClient to send the request without waiting for the response
 
 		// TODO: once the ml is ready do add it
-		// _, err = http.DefaultClient.Do(req)
+		_, err = http.DefaultClient.Do(req)
 		// if err != nil {
 		// 	return http.StatusInternalServerError, err
 		// }

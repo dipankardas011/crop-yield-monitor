@@ -34,14 +34,15 @@
 
         document.getElementById('outputBytes').value = JSON.stringify(byteValues);
 
-        fetch('http://localhost:8080/upload', {
+        fetch('http://127.0.0.1:5000/upload', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ image: byteValues, format: String(format) })
         }).then(response => response.json())
-          .then(data => console.log(data));
+          .then(data => console.log(data))
+          .catch(err => console.log(err));
       };
 
       reader.readAsArrayBuffer(file);

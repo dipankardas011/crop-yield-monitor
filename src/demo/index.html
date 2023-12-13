@@ -34,10 +34,11 @@
 
         document.getElementById('outputBytes').value = JSON.stringify(byteValues);
 
-        fetch('http://127.0.0.1:5000/upload', {
+        fetch('http://127.0.0.1:5000/upload?username=dipankar', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer <Token>'
           },
           body: JSON.stringify({ image: byteValues, format: String(format) })
         }).then(response => response.json())

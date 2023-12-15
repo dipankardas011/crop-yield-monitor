@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import the CORS extension
 from SoilRecommendation import predict_single_image, rf_classifier, label_encoder
+import base64
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/upload": {"origins": "*"}})  # Enable CORS for all routes in the app
@@ -13,25 +15,29 @@ def upload_image():
     # Get query parameters
     username_param = request.args.get('username')
 
-    print("username= ",username_param)
-    print("auth_header= ", auth_header)
+    print("username=",username_param)
+    print("auth_header=", auth_header)
 
-    data = request.get_json()
-    if not data or 'raw_image_bytes' not in data or 'image_format' not in data:
+    data_req = request.get_json()
+    if not data_req or 'raw_image_bytes' not in data_req or 'image_format' not in data_req:
         return jsonify({'error': 'Invalid request'}), 400
 
-    image_data = bytes(data['raw_image_bytes'])
-    image_format = data['image_format']
+    image_data = data_req['raw_image_bytes']
+    image_format = data_req['image_format']
+
+    raw_data = base64.b64decode(image_data)
+    # raw_data = bytes(image_data)
 
     file_extension = 'jpeg' if image_format == 'image/jpeg' else 'png'
     file_name = f'image.{file_extension}'
 
     try:
         with open(file_name, 'wb') as image_file:
-            image_file.write(image_data)
+            image_file.write(raw_data)
     except Exception as e:
         print(e)
         return jsonify({'error': 'Failed to save image'}), 500
+
 
     # Make a prediction for the test image
     predicted_class = predict_single_image("/app/"+file_name, rf_classifier, label_encoder)

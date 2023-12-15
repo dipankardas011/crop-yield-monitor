@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -73,71 +74,81 @@ func GetRecommendations(w http.ResponseWriter, r *http.Request) (int, error) {
 	// TODO: first write for the noReady state when the record is not present
 	// second if the record was present but with Status notReady we need to wait for ML
 
-	recommend, err := dbClient.ReadRecommendations(username)
+	// recommend, err := dbClient.ReadRecommendations(username)
+	// if err != nil {
+	// 	if err == redis.Nil {
+	// 		// need to write to the db
+	// 		recommend = &Recommendations{Status: RecommendationNotReady}
+	//
+	// 		if err := dbClient.WriteRecommendations(username, *recommend); err != nil {
+	// 			return http.StatusInternalServerError, err
+	// 		}
+	// 	} else {
+	// 		return http.StatusInternalServerError, err
+	// 	}
+	// }
+
+	type MLResponse struct {
+		Status  string   `json:"status"`
+		Message string   `json:"message"`
+		Crops   []string `json:"crops"`
+	}
+	res := MLResponse{}
+
+	// if recommend.Status == RecommendationNotReady && recommend.Status != RecommendationScheduled {
+
+	// get the image
+	stat, rawImg, err := getImage(r)
 	if err != nil {
-		if err == redis.Nil {
-			// need to write to the db
-			recommend = &Recommendations{Status: RecommendationNotReady}
-
-			if err := dbClient.WriteRecommendations(username, *recommend); err != nil {
-				return http.StatusInternalServerError, err
-			}
-		} else {
-			return http.StatusInternalServerError, err
-		}
+		return stat, err
 	}
 
-	// NOTE: redundant check for readability
-	if recommend.Status == RecommendationNotReady && recommend.Status != RecommendationScheduled {
-		// call the ML will be avoided (DUPLICATION of trigger can happen) for that Flag is there
-		// WARN: Responsibility of the ML developer to handle these
-		// NOTE: Need to decide whether the ML part will require another auth call or we simply pass the username as json body for it to handle rest
-		// WARN: making assumption its PUT request
-		// TODO: the ML will recieve the Auth Token and the username
-
-		// get the image
-		stat, rawImg, err := getImage(r)
-		if err != nil {
-			return stat, err
-		}
-
-		rawImgPayload, err := json.Marshal(rawImg)
-		if err != nil {
-			return http.StatusInternalServerError, err
-		}
-
-		// Create a new PUT request
-		req, err := http.NewRequest("PUT", ML_SVR_URL+"?username="+username, bytes.NewBuffer(rawImgPayload))
-		if err != nil {
-			return http.StatusInternalServerError, err
-		}
-
-		userCookie, err := r.Cookie("user_token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				return http.StatusUnauthorized, apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
-			}
-			return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
-		}
-
-		// Set content type to application/json
-		req.Header.Set("Content-Type", "application/json")
-		// sharing the authorization link
-		req.Header.Set("Authorization", "Bearer "+userCookie.Value)
-
-		// Use http.DefaultClient to send the request without waiting for the response
-
-		// TODO: once the ml is ready do add it
-		_, err = http.DefaultClient.Do(req)
-		// if err != nil {
-		// 	return http.StatusInternalServerError, err
-		// }
-		recommend.Crops = []string{"rice-demo", "maze-demo"} // remove this before adding ml
+	rawImgPayload, err := json.Marshal(rawImg)
+	if err != nil {
+		return http.StatusInternalServerError, err
 	}
+
+	// Create a new PUT request
+	req, err := http.NewRequest("POST", ML_SVR_URL+"?username="+username, bytes.NewReader(rawImgPayload))
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	userCookie, err := r.Cookie("user_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return http.StatusUnauthorized, apiError{Err: "Missing Cookie", Status: http.StatusUnauthorized}
+		}
+		return http.StatusInternalServerError, apiError{Err: err.Error(), Status: http.StatusInternalServerError}
+	}
+
+	req.Header.Set("Authorization", "Bearer "+userCookie.Value)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	response, err := client.Do(req)
+	if err != nil {
+		return response.StatusCode, apiError{Status: response.StatusCode, Err: err.Error()}
+	}
+
+	responseBody, error := io.ReadAll(response.Body)
+	if error != nil {
+		return http.StatusInternalServerError, error
+	}
+
+	if err := json.Unmarshal(responseBody, &res); err != nil {
+		return http.StatusInternalServerError, apiError{Status: http.StatusInternalServerError, Err: err.Error()}
+	}
+
+	// }
 
 	return writeJson(w, http.StatusOK, Response{
-		Stdout:          "recommendation for username " + username,
-		Recommendations: *recommend,
+		Stdout: fmt.Sprintf("Recommendation for user: %s\n%s", username, res.Message),
+		Recommendations: Recommendations{
+			Crops:  res.Crops,
+			Status: RecommendationStatus(res.Status),
+		},
 	})
 }
 

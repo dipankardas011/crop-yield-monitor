@@ -133,7 +133,7 @@
           // Check for successful login (adjust based on your backend response structure)
           if (response.ok) {
             // Redirect to the dashboard
-            result.textContent = JSON.stringify(data.recommendations, null, 2);
+            result.textContent = JSON.stringify(data.stdout, null, 2)+"; "+JSON.stringify(data.recommendations, null, 2);
             result.classList.add("alert", "alert-success");
           } else {
             // Handle login failure (display an error message, etc.)

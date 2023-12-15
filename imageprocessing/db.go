@@ -67,7 +67,7 @@ func (this *ImageDBClient) ReadImage(username string) (*Image, error) {
 	this.mx.RLock()
 	defer this.mx.RUnlock()
 
-	rawImg, err := this.client.Get(this.ctx, username).Result()
+	rawImg, err := this.client.Get(this.ctx, username).Bytes()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, fmt.Errorf("Key not found in Redis")
@@ -76,7 +76,7 @@ func (this *ImageDBClient) ReadImage(username string) (*Image, error) {
 	}
 
 	var data *Image
-	if err := json.Unmarshal([]byte(rawImg), &data); err != nil {
+	if err := json.Unmarshal(rawImg, &data); err != nil {
 		return nil, err
 	}
 	return data, nil

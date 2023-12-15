@@ -51,9 +51,9 @@ def predict_single_image(image_path, classifier, label_encoder):
     return predicted_label
 
 # Define paths for each class folder
-gravel_path = 'D:/soil classification/soilPhotos/Gravel'
-sand_path = 'D:/soil classification/soilPhotos/Sand'
-silt_path = 'D:/soil classification/soilPhotos/Silt'
+gravel_path = '/app/train/Gravel'
+sand_path = '/app/train/Sand'
+silt_path = '/app/train/Silt'
 
 # Load and preprocess data for each class
 gravel_images, gravel_labels = load_and_preprocess(gravel_path)
@@ -71,20 +71,3 @@ all_labels_encoded = label_encoder.fit_transform(all_labels)
 # Train a Random Forest classifier
 rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
 rf_classifier.fit(all_images, all_labels_encoded)
-
-# Specify the path of the test image
-test_image_path = 'D:/soil classification/test/Gravel/4.jpg'
-
-# Make a prediction for the test image
-predicted_class = predict_single_image(test_image_path, rf_classifier, label_encoder)
-
-# Print the predicted class
-print(f"The test image belongs to the class: {predicted_class}")
-
-if predicted_class == "Gravel":
-    print("\nGravelly soil tends to be well-draining but may not retain water and nutrients as effectively. Crops that can tolerate well-draining conditions and do not require high fertility may be suitable.\n\nRecommended crops: Grapevines, certain varieties of strawberries, drought-tolerant vegetables (e.g., tomatoes, peppers), and herbs like rosemary.")
-    
-if predicted_class == "Sand":
-    print("\nSandy soil drains quickly but may lack fertility and moisture retention. Crops that thrive in well-draining conditions and can tolerate lower fertility are suitable for sandy soil.\n\nRecommended crops: Carrots, radishes, potatoes, asparagus, melons, and drought-tolerant plants like lavender.")
-if predicted_class == "Silt":
-    print("\nSilt has finer particles and better moisture retention than sand. It is fertile and suitable for a wide range of crops.\n\nRecommended crops: Beans, peas, leafy greens (e.g., lettuce, spinach), broccoli, cabbage, and most garden vegetables. Silt soil is versatile and supports various crops.")

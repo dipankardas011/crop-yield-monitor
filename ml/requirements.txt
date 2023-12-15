@@ -1,0 +1,6 @@
+Flask-CORS
+flask
+scikit-learn
+Pillow
+numpy
+scikit-image

@@ -20,7 +20,7 @@ var (
 const (
 	AUTH_SVR_URL        string   = "http://auth:8080/account/token"
 	IMG_SVR_URL         string   = "http://image:8090/image/get"
-	ML_SVR_URL          string   = "http://ml:9090/start"
+	ML_SVR_URL          string   = "http://ml:5000/upload"
 	BadJsonFormat       ErrorMsg = "[Err] wrong json format"
 	InternalServerError ErrorMsg = "[Err] internal server error"
 )

@@ -19,6 +19,10 @@ ui:
 	@echo "building frontend"
 	cd frontend && docker build -t frontend .
 
+model:
+	@echo "building ml-model"
+	cd ml && docker build -t ml .
+
 ####### Database
 image-db:
 	@echo "building image-db"
@@ -33,7 +37,7 @@ recommend-db:
 	cd db/recommend && docker build -t recommend-db .
 
 ####### Build all containers
-build: recommend image auth lb ui auth-db image-db recommend-db
+build: recommend image auth lb ui model auth-db image-db recommend-db
 	@echo "Building done"
 
 

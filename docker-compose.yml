@@ -68,6 +68,13 @@ services:
     networks:
     - crop-yield
 
+  ml:
+    image: ml
+    depends_on:
+      - recommend
+    networks:
+      - crop-yield
+
   lb-backend:
     image: lb-backend
     depends_on:
@@ -79,8 +86,7 @@ services:
     ports:
       - "9090:80"
 
-  # another one for the ml workload
-  # todo
+
 
   # frontend server
   frontend:

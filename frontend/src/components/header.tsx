@@ -22,6 +22,7 @@ import Link from "next/link"
 import { ModeToggle } from "./theme-toogle"
 import { Button } from "./ui/button"
 import { Mail } from "lucide-react"
+import { Logout } from "./logout"
 
 
 function getUserName(): string | undefined {
@@ -40,7 +41,7 @@ function avatarDemo() {
       <DropdownMenuContent>
         <DropdownMenuLabel>{getUserName()}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Logout</DropdownMenuItem>
+        <DropdownMenuItem onClick={Logout}>Logout</DropdownMenuItem>
         <DropdownMenuItem>Billing</DropdownMenuItem>
         <DropdownMenuItem>Team</DropdownMenuItem>
         <DropdownMenuItem>Subscription</DropdownMenuItem>

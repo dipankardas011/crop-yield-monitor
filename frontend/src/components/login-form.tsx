@@ -28,6 +28,7 @@ const formSchema = z.object({
 })
 
 
+
 export function ProfileForm() {
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,44 +45,71 @@ export function ProfileForm() {
     const container = document.getElementById('response-login');
 
     const root = createRoot(container!);
-    root.render(AlertMessage("default", "Login successfully\n"+JSON.stringify(values)));
-    // root.render(AlertMessage("destructive", "Login wasn't successfully\n"+JSON.stringify(values)));
+
+    async function login() {
+
+      try {
+        const response = await fetch('http://localhost:9090/account/signin', {
+          method: 'POST', // Change to POST if necessary
+          credentials: 'include',
+          body: JSON.stringify({ username: values.username, password: values.password }), // Uncomment for POST
+        });
+
+        const data = await response.json();
+
+        // Check for successful login (adjust based on your backend response structure)
+        if (response.ok) {
+          // Redirect to the dashboard
+          root.render(AlertMessage("default", "Login successfully\n" + JSON.stringify(data, null, 2)));
+          window.location.href = '/account/dashboard/';
+        } else {
+          // Handle login failure (display an error message, etc.)
+          root.render(AlertMessage("destructive", "Login failed\n" + String(data.error)));
+          console.error('Login failed:', data.error);
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+        root.render(AlertMessage("destructive", "Login failed\n" + String(error)));
+        console.error('Login failed:', error);
+      }
+    }
+    login()
   }
 
   return (
     <>
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-10">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="admin" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input placeholder="XXX" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
-    <div id="response-login"></div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-10">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="admin" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input placeholder="XXX" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
+      <div id="response-login"></div>
     </>
   );
 }

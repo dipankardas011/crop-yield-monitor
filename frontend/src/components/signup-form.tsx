@@ -43,17 +43,42 @@ export function ProfileForm() {
     },
   })
 
-
-
-  // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    const container = document.getElementById('response-login');
+
+    const container = document.getElementById('response-signup');
 
     const root = createRoot(container!);
-    root.render(AlertMessage("default", "Login successfully\n"+JSON.stringify(values)));
-    // root.render(AlertMessage("destructive", "Signup wasn't successfully\n"+JSON.stringify(values)));
+
+    async function signup() {
+
+      try {
+        const response = await fetch('http://localhost:9090/account/signup', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: values.name,
+            username: values.username,
+            password: values.password,
+            email: values.emailid,
+          }),
+        });
+
+        const data = await response.json();
+
+        // Check for successful signup (adjust based on your backend response structure)
+        if (response.ok) {
+          // Redirect to the login page or perform other actions as needed
+          root.render(AlertMessage("default", "Signup successfully\n" + JSON.stringify(data, null, 2)));
+        } else {
+          // Handle signup failure (display an error message, etc.)
+          root.render(AlertMessage("destructive", "Signup failed\n" + data.error));
+          console.error('Signup failed:', data.error);
+        }
+      } catch (error) {
+        root.render(AlertMessage("destructive", "Signup failed\n" + String(error)));
+        console.error('Signup failed:', error);
+      }
+    }
+    signup()
   }
 
   return (
@@ -115,7 +140,7 @@ export function ProfileForm() {
         <Button type="submit">Submit</Button>
       </form>
     </Form>
-    <div id="response-login"></div>
+    <div id="response-signup"></div>
     </>
   )
 }

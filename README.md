@@ -7,6 +7,8 @@
 
 ![design image](design-plan.jpeg)
 
+# Screenshots
+![](./frontend.png)
 
 # Demo Try
 
